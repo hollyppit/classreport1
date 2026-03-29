@@ -254,10 +254,12 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 /* 인쇄 */
 @page { size: A4 portrait; margin: 0; }
 @media print {
-  html, body { margin: 0; padding: 0; }
-  body > *:not(.preview-scroll) { display: none !important; }
-  .preview-scroll { display: block !important; background: white; padding: 0; border: none; }
-  #report-page { box-shadow: none; border: none; }
+  html, body { margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .app-header, .input-panel, .preview-label { display: none !important; }
+  .editor-wrap { display: block !important; margin: 0 !important; padding: 0 !important; max-width: none !important; border: none !important; }
+  .preview-panel { margin: 0 !important; padding: 0 !important; border: none !important; }
+  .preview-scroll { display: block !important; background: white !important; padding: 0 !important; border: none !important; max-height: none !important; overflow: visible !important; }
+  #report-page { box-shadow: none !important; border: none !important; margin: 0 !important; transform-origin: top left; }
 }
 @media (max-width: 900px) {
   .editor-wrap { flex-direction: column; }
