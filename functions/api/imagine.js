@@ -105,7 +105,7 @@ export async function onRequestPost(context) {
               contents: [{
                 parts: [
                   { inlineData: { mimeType: mimeType, data: base64Data } },
-                  { text: "Create a manhwa/webtoon/illustration style high-quality version of this child's artwork. Preserve the original composition, colors, and characters, but clean up the lines and add professional digital coloring. The result should be a beautiful, vibrant, and clean illustration that looks like a high-end webtoon panel while staying true to the child's imagination." }
+                  { text: "이 그림을 자연스럽게 다듬어줘. 선을 살짝 정리하고 색감을 채워주되, 수작업으로 직접 그린 느낌이 남아있어야 해. 완성도 높은 일러스트가 아니라, 아이가 열심히 그린 그림처럼 보여야 해. 원본의 구도와 형태는 최대한 유지해줘." }
                 ]
               }],
               generationConfig: { responseModalities: ['IMAGE', 'TEXT'] }
