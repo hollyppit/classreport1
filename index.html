@@ -442,16 +442,16 @@ async function generateFromProfile() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: 'generate', prompt: finalPrompt })
     });
-    if (!imgRes.ok) throw new Error('이미지 생성 실패');
-    const { image } = await imgRes.json();
+    const data = await imgRes.json();
+    if (!imgRes.ok) throw new Error(data.error || '이미지 생성 실패');
 
-    if (image) {
-      updatePhoto('storyboard', image);
+    if (data.image) {
+      updatePhoto('storyboard', data.image);
       closeProfileModal();
     }
   } catch (e) {
     console.error(e);
-    alert('그림 생성 중 오류가 발생했습니다.');
+    alert('그림 생성 중 오류가 발생했습니다: ' + e.message);
     formView.style.display = 'block';
     loadingView.style.display = 'none';
   }
@@ -511,16 +511,16 @@ async function imagineAI(btn, type) {
       body: JSON.stringify(body)
     });
 
-    if (!res.ok) throw new Error('AI 그림 처리 중 오류가 발생했습니다.');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'AI 그림 처리 중 오류가 발생했습니다.');
     
-    const result = await res.json();
-    if (result.image) {
-      // 퀄업이든 생성이든 '원본(storyboard)' 자리에 채움 (사용자 요청: 원본을 덮어씌워줘)
-      updatePhoto('storyboard', result.image);
+    if (data.image) {
+      // 퀄업이든 생성이든 '원본(storyboard)' 자리에 채움
+      updatePhoto('storyboard', data.image);
     }
   } catch (e) {
     console.error(e);
-    alert('그림 작업에 실패했습니다. (GEMINI_API_KEY 설정을 확인해 주세요)');
+    alert('그림 작업에 실패했습니다: ' + e.message);
   } finally {
     btn.innerHTML = originalText;
     btn.disabled = false;
