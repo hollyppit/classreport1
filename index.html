@@ -204,7 +204,7 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
   position: relative; border: 2px solid var(--ink); width: 100%;
   background: #f8f6f2; display: flex; align-items: center; justify-content: center;
 }
-.rpt-photo-cell img { width: 100%; height: auto; max-height: 450px; object-fit: contain; display: block; }
+.rpt-photo-cell img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .rpt-photo-empty {
   width: 100%; height: 100%; background: var(--light);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -245,12 +245,18 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
 
 /* 인쇄 */
+@page { size: A4; margin: 0; }
 @media print {
   body { background: white; padding: 0; }
   .input-panel, .preview-label, .app-header { display: none; }
   .editor-wrap { display: block; }
   .preview-scroll { background: white; padding: 0; border-radius: 0; max-height: none; border: none; }
-  #report-page { box-shadow: none; width: 100%; border: none; border-radius: 0; }
+  #report-page { 
+    box-shadow: none; border: none; border-radius: 0; 
+    transform-origin: top left;
+    page-break-inside: avoid;
+    overflow: hidden;
+  }
 }
 @media (max-width: 900px) {
   .editor-wrap { flex-direction: column; }
@@ -719,6 +725,24 @@ function downloadReport() {
   generateReport();
   setTimeout(() => window.print(), 300);
 }
+
+window.onbeforeprint = function() {
+  const page = document.getElementById('report-page');
+  if (!page) return;
+  const scaleX = 794 / page.scrollWidth;
+  const scaleY = 1123 / page.scrollHeight;
+  const scale = Math.min(scaleX, scaleY, 1);
+  page.style.transform = `scale(${scale})`;
+  page.style.transformOrigin = 'top left';
+  page.style.width = (794 / scale) + 'px';
+};
+
+window.onafterprint = function() {
+  const page = document.getElementById('report-page');
+  if (!page) return;
+  page.style.transform = '';
+  page.style.width = '';
+};
 
 generateReport();
 </script>
