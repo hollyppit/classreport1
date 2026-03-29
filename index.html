@@ -312,8 +312,11 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
     </div>
 
     <div class="card">
-      <div class="card-title">
-        <div class="card-title-dot" style="background:var(--lavender)"></div>코멘트 (선택)
+      <div class="card-title" style="justify-content: space-between;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="card-title-dot" style="background:var(--lavender)"></div>코멘트 (선택)
+        </div>
+        <button class="btn-ai" onclick="generateAIComment(this)" style="background:linear-gradient(135deg,#c9b8ff,#9f7fff); color:#fff; border:none; padding:4px 10px; border-radius:12px; font-size:10px; font-weight:900; cursor:pointer; box-shadow: 2px 2px 0 rgba(30,30,46,0.15); transition: transform 0.1s;">✨ AI 자동 생성</button>
       </div>
       <label>학생 소감</label>
       <textarea id="student-comment" placeholder="예: 내 캐릭터가 살아있는 것 같아서 너무 신기했어요!" oninput="syncPreview()"></textarea>
@@ -356,6 +359,50 @@ function handlePhoto(input, key) {
 }
 
 function syncPreview() { generateReport(); }
+
+async function generateAIComment(btn) {
+  const originalText = btn.innerHTML;
+  btn.innerHTML = "⏳ 생성 중...";
+  btn.disabled = true;
+
+  try {
+    const req = {
+      projectName: document.getElementById('project-name').value,
+      studentName: document.getElementById('student-name').value,
+      sessionInfo: document.getElementById('session-info').value,
+      storyboardImg: photos.storyboard,
+      processImg: photos.process,
+      finalImg: photos.final
+    };
+
+    if (!req.storyboardImg && !req.processImg && !req.finalImg) {
+      alert("AI가 분석할 그림 사진을 먼저 업로드해주세요!");
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      return;
+    }
+
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req)
+    });
+
+    if (!res.ok) throw new Error('AI 분석에 실패했습니다.');
+    
+    const data = await res.json();
+    if (data.student_comment) document.getElementById('student-comment').value = data.student_comment;
+    if (data.teacher_comment) document.getElementById('teacher-comment').value = data.teacher_comment;
+    
+    syncPreview();
+  } catch (e) {
+    console.error(e);
+    alert('AI 코멘트 생성에 실패했습니다. (Cloudflare 환경 변수 설정 확인)');
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
 
 function generateReport() {
   const projectName = document.getElementById('project-name').value || '수업 메이킹 일지';
