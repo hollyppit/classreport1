@@ -935,6 +935,9 @@ async function exportWord() {
   const photoCount = activePhotos.length;
   
   const maxWidth = 220; // 사용자 요청 기준 너비
+  let maxHeight = 560;
+  if (photoCount === 2) maxHeight = 270;
+  if (photoCount === 3) maxHeight = 170;
 
   for (const item of activePhotos) {
     photoChildren.push(new Paragraph({
@@ -946,15 +949,33 @@ async function exportWord() {
       const dims = await getImageDimensions(dataUrl);
       const ratio = dims.height / dims.width || 1;
 
-      const imgWidth = maxWidth;
-      const imgHeight = Math.round(maxWidth * ratio);
+      let finalWidth, finalHeight;
+      if (dims.height > dims.width) {
+        // 세로형
+        finalHeight = Math.min(maxHeight, maxWidth * ratio);
+        finalWidth = Math.round(finalHeight / ratio);
+      } else {
+        // 가로형
+        finalWidth = maxWidth;
+        finalHeight = Math.min(maxHeight, Math.round(maxWidth * ratio));
+      }
+
+      // 최종 안전장치
+      if (finalHeight > maxHeight) {
+        finalHeight = maxHeight;
+        finalWidth = Math.round(maxHeight / ratio);
+      }
+      if (finalWidth > maxWidth) {
+        finalWidth = maxWidth;
+        finalHeight = Math.round(maxWidth * ratio);
+      }
 
       const buffer = base64ToArrayBuffer(dataUrl);
       photoChildren.push(new Paragraph({
         children: [
           new ImageRun({
             data: buffer,
-            transformation: { width: imgWidth, height: imgHeight },
+            transformation: { width: finalWidth, height: finalHeight },
           }),
         ],
         alignment: AlignmentType.CENTER,
