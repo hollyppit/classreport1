@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수업 메이킹 일지</title>
+<script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Myeongjo:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Cafe24Ohsquare&family=Cafe24Ssurround&family=Cafe24SsurroundAir&family=Cafe24Shiningstar&family=Cafe24Simplehae&family=Cafe24Dongdong&display=swap');
 
@@ -361,6 +362,7 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 
     <button id="main-generate-btn" class="btn-primary" onclick="generateAIReport(this)">리포트 생성하기 🎉</button>
     <button class="btn-secondary" onclick="downloadReport()">⬇ PDF로 저장하기</button>
+    <button class="btn-secondary" onclick="exportWord()" style="margin-top:8px; background:#fff; border-color:var(--border);">📝 Word로 저장하기</button>
   </div>
 
   <div class="preview-panel">
@@ -779,6 +781,133 @@ function changeReportFont(fontName, btn) {
   btn.classList.add('active');
   
   syncPreview();
+}
+
+async function exportWord() {
+  const { Document, Paragraph, TextRun, ImageRun, HeadingLevel, AlignmentType, Packer, Table, TableRow, TableCell, WidthType, BorderStyle } = docx;
+  
+  const projectName = document.getElementById('project-name').value || '수업 메이킹 일지';
+  const studentName = document.getElementById('student-name').value || '학생';
+  const sessionInfo = document.getElementById('session-info').value || '-';
+  const reportDate  = document.getElementById('report-date').value  || '-';
+  const teacherName = document.getElementById('teacher-name').value || '-';
+  const studentCmt  = document.getElementById('student-comment').value;
+  const teacherCmt  = document.getElementById('teacher-comment').value;
+
+  const sections = [];
+
+  // 제목 및 부제
+  sections.push(new Paragraph({
+    children: [new TextRun({ text: projectName, bold: true, size: 48 })],
+    heading: HeadingLevel.HEADING_1,
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 200 },
+  }));
+  sections.push(new Paragraph({
+    children: [new TextRun({ text: "ART CLASS · MAKING REPORT", size: 20, color: "6b6b8a" })],
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 400 },
+  }));
+
+  // 정보 표
+  sections.push(new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "학생", bold: true, size: 24 })] })], shading: { fill: "f5f0e8" } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: studentName, size: 24 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "회차", bold: true, size: 24 })] })], shading: { fill: "f5f0e8" } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: sessionInfo, size: 24 })] })] }),
+        ]
+      }),
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "날짜", bold: true, size: 24 })] })], shading: { fill: "f5f0e8" } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: reportDate, size: 24 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "담당", bold: true, size: 24 })] })], shading: { fill: "f5f0e8" } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: teacherName, size: 24 })] })] }),
+        ]
+      }),
+    ],
+    spacing: { after: 400 },
+  }));
+
+  // 이미지 변환 헬퍼
+  const getBuffer = async (url) => {
+    const res = await fetch(url);
+    return await res.arrayBuffer();
+  };
+
+  // 사진들
+  const photoKeys = [
+    { key: 'storyboard', label: '🖼️ 작업 기록 (원본/기획)' },
+    { key: 'final', label: '⭐ 작업 기록 (최종 완성본)' },
+    { key: 'process', label: '🎨 수업 과정' }
+  ];
+
+  for (const item of photoKeys) {
+    if (photos[item.key]) {
+      sections.push(new Paragraph({
+        children: [new TextRun({ text: item.label, bold: true, size: 28, color: "111111" })],
+        spacing: { before: 400, after: 200 },
+      }));
+      try {
+        const buffer = await getBuffer(photos[item.key]);
+        sections.push(new Paragraph({
+          children: [
+            new ImageRun({
+              data: buffer,
+              transformation: { width: 500, height: 281 }, // 16:9 비율 유지
+            }),
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 300 },
+        }));
+      } catch (e) {
+        console.error("Image load failed", e);
+      }
+    }
+  }
+
+  // 코멘트
+  if (studentCmt) {
+    sections.push(new Paragraph({
+      children: [new TextRun({ text: "💬 수업 활동 내용", bold: true, size: 28, color: "8b6fff" })],
+      spacing: { before: 400, after: 200 },
+    }));
+    sections.push(new Paragraph({
+      children: [new TextRun({ text: studentCmt, size: 24 })],
+      spacing: { after: 300 },
+    }));
+  }
+
+  if (teacherCmt) {
+    sections.push(new Paragraph({
+      children: [new TextRun({ text: "✍️ 선생님 코멘트", bold: true, size: 28, color: "4dddbc" })],
+      spacing: { before: 400, after: 200 },
+    }));
+    sections.push(new Paragraph({
+      children: [new TextRun({ text: teacherCmt, size: 24 })],
+      spacing: { after: 300 },
+    }));
+  }
+
+  const doc = new Document({
+    sections: [{
+      properties: {},
+      children: sections,
+    }],
+  });
+
+  Packer.toBlob(doc).then(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${projectName}_${studentName}_메이킹일지.docx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
 }
 
 generateReport();
