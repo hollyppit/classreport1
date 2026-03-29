@@ -850,6 +850,15 @@ function base64ToArrayBuffer(base64) {
   return bytes.buffer;
 }
 
+function getImageDimensions(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onerror = () => resolve({ width: 1, height: 1 });
+    img.src = dataUrl;
+  });
+}
+
 async function exportWord() {
   const { Document, Paragraph, TextRun, ImageRun, HeadingLevel, AlignmentType, Packer, Table, TableRow, TableCell, WidthType, BorderStyle } = window.docx;
   
@@ -914,10 +923,7 @@ async function exportWord() {
   const activePhotos = photoKeys.filter(item => photos[item.key]);
   const photoCount = activePhotos.length;
   
-  // 요청하신 크기 기준
-  let imgWidth = 280, imgHeight = 180;
-  if (photoCount === 1) { imgWidth = 320; imgHeight = 240; }
-  else if (photoCount === 2) { imgWidth = 300; imgHeight = 200; }
+  const maxWidth = 280; // 픽셀 단위 최대 너비
 
   for (const item of activePhotos) {
     photoChildren.push(new Paragraph({
@@ -925,7 +931,13 @@ async function exportWord() {
       spacing: { before: 150, after: 80 },
     }));
     try {
-      const buffer = base64ToArrayBuffer(photos[item.key]);
+      const dataUrl = photos[item.key];
+      const dims = await getImageDimensions(dataUrl);
+      const ratio = dims.height / dims.width || 1;
+      const imgWidth = maxWidth;
+      const imgHeight = Math.round(maxWidth * ratio);
+
+      const buffer = base64ToArrayBuffer(dataUrl);
       photoChildren.push(new Paragraph({
         children: [
           new ImageRun({
