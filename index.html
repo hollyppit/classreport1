@@ -324,7 +324,7 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
       <textarea id="teacher-comment" placeholder="예: 색감 선택이 굉장히 과감하고 독창적이었습니다." oninput="syncPreview()"></textarea>
     </div>
 
-    <button class="btn-primary" onclick="generateReport()">리포트 생성하기 🎉</button>
+    <button id="main-generate-btn" class="btn-primary" onclick="generateAIReport(this)">리포트 생성하기 🎉</button>
     <button class="btn-secondary" onclick="downloadReport()">⬇ PDF로 저장하기</button>
   </div>
 
@@ -360,6 +360,52 @@ function handlePhoto(input, key) {
 
 function syncPreview() { generateReport(); }
 
+async function generateAIReport(btn) {
+  const originalText = btn.innerHTML;
+  btn.innerHTML = "AI가 리포트를 작성 중이에요... ✨";
+  btn.disabled = true;
+
+  try {
+    const req = {
+      projectName: document.getElementById('project-name').value,
+      studentName: document.getElementById('student-name').value,
+      sessionInfo: document.getElementById('session-info').value,
+      reportDate:  document.getElementById('report-date').value,
+      teacherName: document.getElementById('teacher-name').value,
+      student_comment: document.getElementById('student-comment').value,
+      teacher_comment: document.getElementById('teacher-comment').value,
+      storyboardImg: photos.storyboard,
+      processImg: photos.process,
+      finalImg: photos.final
+    };
+
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req)
+    });
+
+    if (!res.ok) throw new Error('AI 분석에 실패했습니다.');
+    
+    const data = await res.json();
+    if (data.projectName) document.getElementById('project-name').value = data.projectName;
+    if (data.studentName) document.getElementById('student-name').value = data.studentName;
+    if (data.sessionInfo) document.getElementById('session-info').value = data.sessionInfo;
+    if (data.reportDate)  document.getElementById('report-date').value = data.reportDate;
+    if (data.teacherName) document.getElementById('teacher-name').value = data.teacherName;
+    if (data.student_comment) document.getElementById('student-comment').value = data.student_comment;
+    if (data.teacher_comment) document.getElementById('teacher-comment').value = data.teacher_comment;
+    
+    generateReport();
+  } catch (e) {
+    console.error(e);
+    alert('리포트 생성 중 오류가 발생했습니다. (환경 변수 설정을 확인해 주세요)');
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
+
 async function generateAIComment(btn) {
   const originalText = btn.innerHTML;
   btn.innerHTML = "⏳ 생성 중...";
@@ -375,14 +421,7 @@ async function generateAIComment(btn) {
       finalImg: photos.final
     };
 
-    if (!req.storyboardImg && !req.processImg && !req.finalImg) {
-      alert("AI가 분석할 그림 사진을 먼저 업로드해주세요!");
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-      return;
-    }
-
-    const res = await fetch('/api/chat', {
+    const res = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req)
@@ -397,7 +436,7 @@ async function generateAIComment(btn) {
     syncPreview();
   } catch (e) {
     console.error(e);
-    alert('AI 코멘트 생성에 실패했습니다. (Cloudflare 환경 변수 설정 확인)');
+    alert('AI 코멘트 생성에 실패했습니다.');
   } finally {
     btn.innerHTML = originalText;
     btn.disabled = false;

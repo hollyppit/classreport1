@@ -18,26 +18,44 @@ function corsHeaders() {
 export async function onRequestPost({ request, env }) {
   try {
     const data = await request.json();
-    const { projectName, studentName, sessionInfo, storyboardImg, processImg, finalImg } = data;
+    const { projectName, studentName, sessionInfo, reportDate, teacherName, student_comment, teacher_comment, storyboardImg, processImg, finalImg } = data;
+
+    const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 
     const basePrompt = `
-    다음 미술 수업 데이터를 바탕으로 '수업 활동 내용'과 '선생님 코멘트'를 작성해줘. 
-    수업 활동 내용은 학생이 오늘 수업에서 진행한 구체적인 작업(예: 기획, 스케치, 채색, 기법 등)과 특징적인 활동을 1~2문장 내외로 생생하고 객관적으로 요약해줘.
-    선생님 코멘트는 첨부된 '그림 결과물과 과정'에 대한 전문적이고 구체적인 시각적 분석과, '수업 관찰' 내용(아이의 태도, 문제 해결 방식, 몰입도, 창의성 등)을 통합 포괄해서 3~4문장으로 따뜻하고 다정하게 작성해줘. 선생님 코멘트는 주로 "~했습니다.", "~해서 참 다채롭고 멋졌습니다." 같은 격려와 칭찬의 해요체를 사용해줘.
+    다음 미술 수업 데이터를 바탕으로 리포트의 모든 필드를 최적으로 완성해줘. 
+    기존에 입력된 내용이 있다면 그것을 바탕으로 더 전문적이고 다정한 어조로 '개선'하고, 비어있는 필드는 사진 분석과 문맥을 통해 자연스럽게 '추론'해서 채워줘.
 
-    [기본 정보]
-    프로젝트/수업 이름: ${projectName || '입력 안됨'}
-    학생 이름: ${studentName || '입력 안됨'}
-    회차: ${sessionInfo || '입력 안됨'}
+    [필드별 작성 지침]
+    1. projectName: 프로젝트의 성격을 잘 나타내는 멋진 이름을 지어줘. (기존 내용이 있으면 개선)
+    2. studentName: 아이의 이름을 추론하거나 기존 이름을 사용해. (모를 경우 "꿈꾸는 아이" 등으로 정해줘)
+    3. sessionInfo: 몇 회차인지 추론해. (모를 경우 "1회차" 등 적절히 생성)
+    4. reportDate: 비어있으면 "${today}"로 채워줘.
+    5. teacherName: 선생님의 이름을 멋지게 지어줘. (기존 내용이 있으면 개선)
+    6. student_comment (수업 활동 내용): 학생이 오늘 수행한 구체적인 작업물과 특징을 1~2문장으로 생생하게 요약해줘.
+    7. teacher_comment: 그림 결과물과 수업태도, 창의성을 종합 분석하여 3~4문장으로 따뜻하고 다정하게 격려해줘. (~해요체 사용)
 
-    반드시 JSON 형식으로 반환해.
+    [입력 데이터]
+    - 기존 프로젝트명: ${projectName || '입력 안됨'}
+    - 기존 학생명: ${studentName || '입력 안됨'}
+    - 기존 회차: ${sessionInfo || '입력 안됨'}
+    - 기존 날짜: ${reportDate || '입력 안됨'}
+    - 기존 선생님: ${teacherName || '입력 안됨'}
+    - 기존 수업 활동 내용: ${student_comment || '입력 안됨'}
+    - 기존 선생님 코멘트: ${teacher_comment || '입력 안됨'}
+
+    반드시 다음 JSON 형식으로만 반환해. 다른 텍스트는 섞지 마.
     {
+      "projectName": "...",
+      "studentName": "...",
+      "sessionInfo": "...",
+      "reportDate": "...",
+      "teacherName": "...",
       "student_comment": "...",
       "teacher_comment": "..."
     }
     `;
 
-    // Extract mime type and base64 from data URL
     const parseImage = (dataUrl) => {
       if (!dataUrl) return null;
       const match = dataUrl.match(/^data:(image\/[a-z]+);base64,(.+)$/);
@@ -76,9 +94,9 @@ export async function onRequestPost({ request, env }) {
              'anthropic-version': '2023-06-01'
            },
            body: JSON.stringify({
-             model: 'claude-3-5-sonnet-20240620', // or whatever latest claude 3.5 is configured in anthropic
-             max_tokens: 1024,
-             system: "You are a friendly art teacher's assistant. You must output perfectly valid JSON without backticks.",
+             model: 'claude-3-5-sonnet-20240620',
+             max_tokens: 1500,
+             system: "You are a professional art education consultant. You must output perfectly valid JSON without backticks or extra text.",
              messages: [{ role: 'user', content: anthropicContent }]
            })
          });
@@ -92,12 +110,8 @@ export async function onRequestPost({ request, env }) {
            } else {
              result = JSON.parse(text);
            }
-         } else {
-            console.error('Anthropic Error:', await response.text());
          }
-      } catch (err) {
-         console.error('Anthropic Request Failed:', err);
-      }
+      } catch (err) { console.error('Anthropic Request Failed:', err); }
     }
 
     // 2nd Priority: OpenAI (fallback)
@@ -128,16 +142,12 @@ export async function onRequestPost({ request, env }) {
          if (response.ok) {
            const json = await response.json();
            result = JSON.parse(json.choices[0].message.content);
-         } else {
-            console.error('OpenAI Error:', await response.text());
          }
-      } catch (err) {
-         console.error('OpenAI Request Failed:', err);
-      }
+      } catch (err) { console.error('OpenAI Request Failed:', err); }
     }
 
     if (!result) {
-      return new Response(JSON.stringify({ error: 'Failed to generate comments from both Anthropic and OpenAI. Please check your API Keys in Cloudflare Dashboard.' }), { status: 500, headers: corsHeaders() });
+        return new Response(JSON.stringify({ error: 'Failed to generate content.' }), { status: 500, headers: corsHeaders() });
     }
 
     return new Response(JSON.stringify(result), { headers: corsHeaders() });
