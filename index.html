@@ -364,8 +364,8 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
       <input type="text" id="project-name" placeholder="예: 나만의 웹툰 만들기" oninput="syncPreview()">
       <label>학생 이름</label>
       <input type="text" id="student-name" placeholder="예: 김지유" oninput="syncPreview()">
-      <label>회차</label>
-      <input type="text" id="session-info" placeholder="예: 3회차 / 8회차" oninput="syncPreview()">
+      <label>회차/장소</label>
+      <input type="text" id="session-info" placeholder="예: 3회차/00학교" oninput="syncPreview()">
       <label>날짜</label>
       <input type="text" id="report-date" placeholder="예: 2025년 8월 5일" oninput="syncPreview()">
       <label>담당 선생님 (선택)</label>
@@ -767,7 +767,7 @@ function generateReport() {
 
   const metaItems = [
     {key:'학생', val:studentName},
-    {key:'회차', val:sessionInfo},
+    {key:'회차/장소', val:sessionInfo},
     {key:'날짜', val:reportDate},
   ];
   if (teacherName) metaItems.push({key:'담당', val:teacherName});
@@ -902,7 +902,7 @@ async function exportWord() {
         children: [
           new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "학생", bold: true, size: 16 })] })], shading: { fill: "f5f0e8" } }),
           new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: studentName, size: 16 })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "회차", bold: true, size: 16 })] })], shading: { fill: "f5f0e8" } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "회차/장소", bold: true, size: 16 })] })], shading: { fill: "f5f0e8" } }),
           new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: sessionInfo, size: 16 })] })] }),
         ]
       }),
