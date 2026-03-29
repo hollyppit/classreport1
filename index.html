@@ -894,7 +894,7 @@ async function exportWord() {
     spacing: { after: 150 },
   }));
 
-  // 정보 표 (상단 배치)
+  // 1. 메타 정보 표 (2행 4열)
   sections.push(new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     rows: [
@@ -915,10 +915,12 @@ async function exportWord() {
         ]
       }),
     ],
-    spacing: { after: 200 },
   }));
 
-  // 2단 레이아웃을 위한 구성 요소 수집
+  // 표 사이 간격
+  sections.push(new Paragraph({ children: [], spacing: { before: 200, after: 200 } }));
+
+  // 2단 레이아웃을 위한 자식 요소들 수집
   const photoChildren = [];
   const commentChildren = [];
 
@@ -932,9 +934,7 @@ async function exportWord() {
   const activePhotos = photoKeys.filter(item => photos[item.key]);
   const photoCount = activePhotos.length;
   
-  // 크기 계산 로직
-  const maxWidth = 240; 
-  const maxHeight = photoCount > 0 ? (Math.floor(720 / photoCount) - 10) : 720;
+  const maxWidth = 220; // 사용자 요청 기준 너비
 
   for (const item of activePhotos) {
     photoChildren.push(new Paragraph({
@@ -946,23 +946,15 @@ async function exportWord() {
       const dims = await getImageDimensions(dataUrl);
       const ratio = dims.height / dims.width || 1;
 
-      let finalWidth, finalHeight;
-      if (ratio > maxHeight / maxWidth) {
-        // 세로가 더 긴 경우: 높이 기준
-        finalHeight = maxHeight;
-        finalWidth = Math.round(maxHeight / ratio);
-      } else {
-        // 가로가 더 긴 경우: 너비 기준
-        finalWidth = maxWidth;
-        finalHeight = Math.round(maxWidth * ratio);
-      }
+      const imgWidth = maxWidth;
+      const imgHeight = Math.round(maxWidth * ratio);
 
       const buffer = base64ToArrayBuffer(dataUrl);
       photoChildren.push(new Paragraph({
         children: [
           new ImageRun({
             data: buffer,
-            transformation: { width: finalWidth, height: finalHeight },
+            transformation: { width: imgWidth, height: imgHeight },
           }),
         ],
         alignment: AlignmentType.CENTER,
@@ -996,7 +988,7 @@ async function exportWord() {
     }));
   }
 
-  // 2단 표 생성
+  // 2. 본문 정보 표 (1행 2열)
   sections.push(new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     borders: {
