@@ -1,0 +1,26 @@
+function downloadReport() {
+  generateReport();
+  const page = document.getElementById('report-page');
+  page.style.minHeight = 'auto';
+  const totalHeight = page.scrollHeight;
+  if (totalHeight > 1123) {
+    const scale = 1123 / totalHeight;
+    page.style.transform = `scale(${scale})`;
+    page.style.transformOrigin = 'top left';
+    page.style.width = `${100 / scale}%`;
+    page.style.height = '1123px';
+    page.style.overflow = 'hidden';
+  }
+  
+  window.print();
+
+  // ÀÎ¼â ÈÄ ¿øº¹
+  setTimeout(() => {
+    page.style.transform = '';
+    page.style.transformOrigin = '';
+    page.style.width = '';
+    page.style.height = '';
+    page.style.overflow = '';
+    page.style.minHeight = '';
+  }, 1000);
+}
