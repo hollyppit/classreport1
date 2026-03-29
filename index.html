@@ -348,7 +348,7 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 <body>
 
 <div class="app-header">
-  <div class="header-badge">✏️ CLASS REPORT</div>
+  <div class="header-badge">CLASS REPORT</div>
   <h1>수업 일지 작성 솔루션 ✨</h1>
   <p>사진이랑 이름만 넣으면 리포트 완성! 인쇄해서 바로 드릴 수 있어요 🎨</p>
 </div>
@@ -709,7 +709,7 @@ function generateReport() {
     if (hasStoryboard || hasFinal) {
       photosHTML += `
         <div class="rpt-sec" style="margin-top:0;">
-          <div class="rpt-sec-pill" style="color:#ff6b6b;border-color:#ff6b6b;">🖼️ 작업 기록</div>
+          <div class="rpt-sec-pill" style="color:#ff6b6b;border-color:#ff6b6b;">작업 기록</div>
           <div class="rpt-sec-line" style="background:#ffd6d6;"></div>
         </div>
       `;
@@ -727,7 +727,7 @@ function generateReport() {
     if (hasProcess) {
       photosHTML += `
         <div class="rpt-sec">
-          <div class="rpt-sec-pill" style="color:#4dddbc;border-color:#4dddbc;">🎨 수업 과정</div>
+          <div class="rpt-sec-pill" style="color:#4dddbc;border-color:#4dddbc;">수업 과정</div>
           <div class="rpt-sec-line" style="background:#edfff9;"></div>
         </div>
         <div class="rpt-photo-cell"><img src="${photos.process}"></div>
@@ -743,20 +743,20 @@ function generateReport() {
   let commentsHTML = `<div style="width: ${commentWidth}; display: flex; flex-direction: column; gap: 10px;">`;
   commentsHTML += `
     <div class="rpt-sec" style="margin-top:0;">
-      <div class="rpt-sec-pill" style="color:#8b6fff;border-color:#c9b8ff;">💬 수업 코멘트</div>
+      <div class="rpt-sec-pill" style="color:#8b6fff;border-color:#c9b8ff;">수업 코멘트</div>
       <div class="rpt-sec-line" style="background:#e8e0ff;"></div>
     </div>`;
     
   if (studentCmt || teacherCmt) {
     if (studentCmt) commentsHTML += `
       <div class="rpt-comment rpt-comment-student">
-        <div class="rpt-comment-sticker">🌟</div>
+        <div class="rpt-comment-sticker"></div>
         <div class="rpt-comment-who">수업 활동 내용 · ${studentName}</div>
         <div class="rpt-comment-text">${studentCmt}</div>
       </div>`;
     if (teacherCmt) commentsHTML += `
       <div class="rpt-comment rpt-comment-teacher">
-        <div class="rpt-comment-sticker">✍️</div>
+        <div class="rpt-comment-sticker"></div>
         <div class="rpt-comment-who">선생님 코멘트${teacherName ? ' · ' + teacherName : ''}</div>
         <div class="rpt-comment-text">${teacherCmt}</div>
       </div>`;
@@ -775,7 +775,7 @@ function generateReport() {
   document.getElementById('report-page').innerHTML = `
     <div class="rpt-header">
       <div class="rpt-header-inner">
-        <div class="rpt-badge">🎨 CLASS REPORT</div>
+        <div class="rpt-badge">CLASS REPORT</div>
         <div class="rpt-title" style="font-family: inherit">${projectName}</div>
       </div>
     </div>
@@ -926,9 +926,9 @@ async function exportWord() {
 
   // 1. 사진들 수집
   const photoKeys = [
-    { key: 'storyboard', label: '🖼️ 작업 기록 (원본/기획)' },
-    { key: 'final', label: '⭐ 작업 기록 (최종 완성본)' },
-    { key: 'process', label: '🎨 수업 과정' }
+    { key: 'storyboard', label: '작업 기록 (원본/기획)' },
+    { key: 'final', label: '작업 기록 (최종 완성본)' },
+    { key: 'process', label: '수업 과정' }
   ];
   
   const activePhotos = photoKeys.filter(item => photos[item.key]);
@@ -989,7 +989,7 @@ async function exportWord() {
   // 2. 코멘트들 수집
   if (studentCmt) {
     commentChildren.push(new Paragraph({
-      children: [new TextRun({ text: "💬 수업 활동 내용", bold: true, size: 16, color: "8b6fff" })],
+      children: [new TextRun({ text: "수업 활동 내용", bold: true, size: 16, color: "8b6fff" })],
       spacing: { before: 100, after: 50 },
     }));
     commentChildren.push(new Paragraph({
@@ -1000,7 +1000,7 @@ async function exportWord() {
 
   if (teacherCmt) {
     commentChildren.push(new Paragraph({
-      children: [new TextRun({ text: "✍️ 선생님 코멘트", bold: true, size: 16, color: "4dddbc" })],
+      children: [new TextRun({ text: "선생님 코멘트", bold: true, size: 16, color: "4dddbc" })],
       spacing: { before: 100, after: 50 },
     }));
     commentChildren.push(new Paragraph({
