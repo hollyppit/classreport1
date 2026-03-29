@@ -290,11 +290,17 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 
 /* 인쇄 */
 @media print {
-  @page { size: A4 portrait; margin: 10mm; }
+  @page { size: A4 portrait; margin: 8mm; }
   
-  body * { visibility: hidden; }
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
   
-  #report-page, #report-page * { visibility: visible; }
+  body > *:not(#report-page) {
+    display: none !important;
+  }
   
   #report-page {
     position: fixed !important;
@@ -306,7 +312,8 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
-    zoom: 0.9;
+    background: white !important;
+    zoom: 0.85;
   }
 }
 @media (max-width: 900px) {
@@ -787,44 +794,41 @@ function generateReport() {
 
 
 
-async function downloadReport() {
+function downloadReport() {
   generateReport();
-  
-  // 폰트가 로드될 때까지 대기
-  try {
-    await document.fonts.ready;
-  } catch(e) {}
-
   setTimeout(() => {
     const page = document.getElementById('report-page');
+    const originalParent = page.parentNode;
+    const placeholder = document.createElement('div');
     
-    // 스케일 초기화
-    page.style.transform = '';
-    page.style.width = '794px';
-    page.style.height = 'auto';
-    page.style.overflow = 'visible';
-    page.style.position = 'fixed';
-    page.style.top = '0';
-    page.style.left = '0';
-    page.style.zIndex = '99999';
-    page.style.background = 'white';
+    // 원래 위치에 placeholder 삽입
+    originalParent.insertBefore(placeholder, page);
     
-    document.body.style.overflow = 'hidden';
+    // body 직속으로 이동
+    document.body.appendChild(page);
+    
+    // 스타일 초기화 및 고정
+    page.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 794px;
+      height: auto;
+      overflow: visible;
+      z-index: 999999;
+      background: white;
+      transform: none;
+    `;
     
     window.print();
     
     setTimeout(() => {
-      page.style.position = '';
-      page.style.top = '';
-      page.style.left = '';
-      page.style.zIndex = '';
-      page.style.width = '';
-      page.style.height = '';
-      page.style.overflow = '';
-      page.style.background = '';
-      document.body.style.overflow = '';
+      // 원위치 복원
+      page.style.cssText = '';
+      originalParent.insertBefore(page, placeholder);
+      placeholder.remove();
     }, 1500);
-  }, 500);
+  }, 400);
 }
 
 function changeReportFont(fontName, btn) {
