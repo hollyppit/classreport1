@@ -38,7 +38,7 @@ export async function onRequestPost(context) {
 
     if (type === 'generate') {
       // 1. 이미지 생성 (Gemini 2.0 Flash Image Generation 전용 모델 사용)
-      const model = 'gemini-2.0-flash-exp-image-generation';
+      const model = 'gemini-2.0-flash-preview-image-generation';
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
       
       const response = await fetch(url, {
