@@ -37,7 +37,7 @@ export async function onRequestPost(context) {
     let resultImage = null;
 
     if (type === 'generate') {
-      // --- '운명의 거울' 프로젝트 방식의 멀티 모델 폴백 로직 이식 ---
+      // 1. 이미지 생성 (Gemini 멀티 모델 폴백)
       const models = [
         'gemini-2.5-flash-image',
         'gemini-3.1-flash-image-preview',
@@ -84,38 +84,55 @@ export async function onRequestPost(context) {
       }
 
     } else if (type === 'upscale' && image) {
-      // 2. 이미지 기반 퀄업 (기존 구조 유지하되 에러 처리 강화)
-      const model = 'gemini-2.0-flash-exp';
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      // --- '운명의 거울' 프로젝트(caricature) 방식의 이미지-투-이미지 로직 이식 ---
+      const models = [
+        'gemini-2.5-flash-image',
+        'gemini-3.1-flash-image-preview',
+      ];
       
       const [mime, base64Data] = image.split(',');
       const mimeType = mime.match(/:(.*?);/)[1];
+      let lastError = '';
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: "이 어린이 그림을 웹툰/일러스트 스타일로 깔끔하고 고품질로 재해석해서 새로 그려줘. 원본 구도는 유지해줘." },
-              { inlineData: { mimeType: mimeType, data: base64Data } }
-            ]
-          }],
-          generationConfig: { responseModalities: ["IMAGE"] }
-        })
-      });
+      for (const model of models) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { inlineData: { mimeType: mimeType, data: base64Data } },
+                  { text: "Create a manhwa/webtoon/illustration style high-quality version of this child's artwork. Preserve the original composition, colors, and characters, but clean up the lines and add professional digital coloring. The result should be a beautiful, vibrant, and clean illustration that looks like a high-end webtoon panel while staying true to the child's imagination." }
+                ]
+              }],
+              generationConfig: { responseModalities: ['IMAGE', 'TEXT'] }
+            })
+          });
 
-      const resJson = await response.json();
-      if (!response.ok) {
-        console.error('Gemini Upscale Error:', resJson);
-        throw new Error(resJson.error?.message || '퀄업 중 Gemini API 에러 발생');
+          const resJson = await response.json();
+          if (!response.ok) {
+            const errTxt = resJson.error?.message || '실패';
+            throw new Error(`[${model}] ${errTxt}`);
+          }
+
+          const imagePart = resJson.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+          if (imagePart) {
+            resultImage = `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
+            break;
+          } else {
+            throw new Error(`[${model}] 퀄업 결과 이미지를 찾을 수 없습니다`);
+          }
+        } catch (e) {
+          lastError += e.message + ' | ';
+          console.warn(`${model} 퀄업 시도 실패:`, e.message);
+        }
       }
 
-      const imagePart = resJson.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-      if (imagePart) {
-        resultImage = `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
-      } else {
-        throw new Error('퀄업 결과 이미지를 생성하지 못했습니다.');
+      if (!resultImage) {
+        throw new Error('퀄업 모든 모델 시도 실패: ' + lastError);
       }
     }
 
