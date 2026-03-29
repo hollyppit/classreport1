@@ -181,7 +181,7 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 .rpt-meta-val { font-size: 13px; font-weight: 700; color: var(--ink); }
 
 /* 본문 */
-.rpt-body { padding: 24px 44px 32px; }
+.rpt-body { padding: 24px 44px 32px; display: flex; gap: 24px; align-items: stretch; }
 
 .rpt-sec { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; margin-top: 22px; }
 .rpt-sec:first-child { margin-top: 0; }
@@ -200,8 +200,8 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 .rpt-photos.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
 
 .rpt-photo-cell {
-  border-radius: 14px; overflow: hidden; aspect-ratio: 4/3;
-  position: relative; border: 2px solid var(--ink);
+  border-radius: 14px; overflow: hidden; aspect-ratio: 16/9;
+  position: relative; border: 2px solid var(--ink); width: 100%;
 }
 .rpt-photo-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .rpt-photo-label {
@@ -413,66 +413,34 @@ function generateReport() {
   const studentCmt  = document.getElementById('student-comment').value;
   const teacherCmt  = document.getElementById('teacher-comment').value;
 
-  const hasStory = !!photos.storyboard;
-  const hasProc  = !!photos.process;
-  const hasFinal = !!photos.final;
+  // 좌측 60% (사진 세로 나열)
+  let photosHTML = `<div style="width: 60%; display: flex; flex-direction: column; gap: 14px;">`;
+  photosHTML += `
+    <div class="rpt-sec" style="margin-top:0;">
+      <div class="rpt-sec-pill" style="color:#ff6b6b;border-color:#ff6b6b;">🖼️ 작업 기록</div>
+      <div class="rpt-sec-line" style="background:#ffd6d6;"></div>
+    </div>
+  `;
 
-  let photosHTML = '';
+  const addPhoto = (src, icon, label) => {
+    if (src) return `<div class="rpt-photo-cell"><img src="${src}" alt="${label}"><div class="rpt-photo-label">${icon} ${label}</div></div>`;
+    return `<div class="rpt-photo-cell"><div class="rpt-photo-empty"><div class="rpt-photo-empty-icon">${icon}</div>${label}</div></div>`;
+  };
 
-  if (hasStory && hasFinal) {
-    photosHTML += `
-      <div class="rpt-sec" style="margin-top:0;">
-        <div class="rpt-sec-pill" style="color:#ff6b6b;border-color:#ff6b6b;">🔄 Before → After</div>
-        <div class="rpt-sec-line" style="background:#ffd6d6;"></div>
-      </div>
-      <div class="rpt-compare">
-        <div class="rpt-photo-cell"><img src="${photos.storyboard}" alt="원본"><div class="rpt-photo-label">✏️ 원본</div></div>
-        <div class="rpt-compare-arrow"><div class="rpt-arrow-circle">→</div><div class="rpt-arrow-label">완성</div></div>
-        <div class="rpt-photo-cell"><img src="${photos.final}" alt="완성본"><div class="rpt-photo-label">⭐ 최종 완성본</div></div>
-      </div>`;
-  } else if (hasStory || hasFinal) {
-    const singles = [];
-    if (hasStory) singles.push({ src: photos.storyboard, label: '✏️ 원본' });
-    if (hasFinal) singles.push({ src: photos.final, label: '⭐ 최종 완성본' });
-    photosHTML += `
-      <div class="rpt-sec" style="margin-top:0;">
-        <div class="rpt-sec-pill" style="color:#ff6b6b;border-color:#ff6b6b;">🖼️ 작업 기록</div>
-        <div class="rpt-sec-line" style="background:#ffd6d6;"></div>
-      </div>
-      <div class="rpt-photos cols-${singles.length}">
-        ${singles.map(p=>`<div class="rpt-photo-cell"><img src="${p.src}" alt=""><div class="rpt-photo-label">${p.label}</div></div>`).join('')}
-      </div>`;
-  } else {
-    photosHTML += `
-      <div class="rpt-sec" style="margin-top:0;">
-        <div class="rpt-sec-pill" style="color:#ff6b6b;border-color:#ff6b6b;">🖼️ 작업 기록</div>
-        <div class="rpt-sec-line" style="background:#ffd6d6;"></div>
-      </div>
-      <div class="rpt-photos cols-3">
-        ${[{icon:'✏️',l:'원본'},{icon:'🎨',l:'과정'},{icon:'⭐',l:'완성본'}].map(p=>`
-          <div class="rpt-photo-cell"><div class="rpt-photo-empty"><div class="rpt-photo-empty-icon">${p.icon}</div>${p.l}</div></div>
-        `).join('')}
-      </div>`;
-  }
+  photosHTML += addPhoto(photos.storyboard, '✏️', '원본');
+  photosHTML += addPhoto(photos.process, '🎨', '수업 중간 모습');
+  photosHTML += addPhoto(photos.final, '⭐', '최종 완성본');
+  photosHTML += `</div>`;
 
-  if (hasProc) {
-    photosHTML += `
-      <div class="rpt-sec">
-        <div class="rpt-sec-pill" style="color:#4dddbc;border-color:#4dddbc;">🎨 작업 과정</div>
-        <div class="rpt-sec-line" style="background:#c0f5eb;"></div>
-      </div>
-      <div class="rpt-photos cols-1">
-        <div class="rpt-photo-cell" style="aspect-ratio:16/6;"><img src="${photos.process}" alt=""><div class="rpt-photo-label">🎨 수업 중간 모습</div></div>
-      </div>`;
-  }
-
-  let commentsHTML = '';
+  // 우측 40% (코멘트)
+  let commentsHTML = `<div style="width: 40%; display: flex; flex-direction: column; gap: 10px;">`;
+  commentsHTML += `
+    <div class="rpt-sec" style="margin-top:0;">
+      <div class="rpt-sec-pill" style="color:#8b6fff;border-color:#c9b8ff;">💬 수업 코멘트</div>
+      <div class="rpt-sec-line" style="background:#e8e0ff;"></div>
+    </div>`;
+    
   if (studentCmt || teacherCmt) {
-    commentsHTML += `
-      <div class="rpt-sec">
-        <div class="rpt-sec-pill" style="color:#8b6fff;border-color:#c9b8ff;">💬 코멘트</div>
-        <div class="rpt-sec-line" style="background:#e8e0ff;"></div>
-      </div>`;
     if (studentCmt) commentsHTML += `
       <div class="rpt-comment rpt-comment-student">
         <div class="rpt-comment-sticker">🌟</div>
@@ -482,10 +450,13 @@ function generateReport() {
     if (teacherCmt) commentsHTML += `
       <div class="rpt-comment rpt-comment-teacher">
         <div class="rpt-comment-sticker">✍️</div>
-        <div class="rpt-comment-who">선생님 코멘트${teacherName?' · '+teacherName:''}</div>
+        <div class="rpt-comment-who">선생님 코멘트${teacherName ? ' · ' + teacherName : ''}</div>
         <div class="rpt-comment-text">${teacherCmt}</div>
       </div>`;
+  } else {
+    commentsHTML += `<div style="font-size:12px; color:var(--mid); padding:20px; text-align:center; background:#f0ecff; border-radius:14px; border:2px dashed #c9b8ff;">코멘트가 작성되지 않았습니다.</div>`;
   }
+  commentsHTML += `</div>`;
 
   const metaItems = [
     {key:'학생', val:studentName},
@@ -513,6 +484,8 @@ function generateReport() {
       <div class="rpt-footer-right">${projectName} · ${studentName}</div>
     </div>`;
 }
+
+
 
 function downloadReport() {
   generateReport();
