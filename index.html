@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>수업 메이킹 일지</title>
+<title>수업 일지 작성 솔루션</title>
 <link rel="preload" href="https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/Cafe24Ohsquare.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24Ssurround.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Dongdong.woff" as="font" type="font/woff" crossorigin>
@@ -348,7 +348,7 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 <body>
 
 <div class="app-header">
-  <div class="header-badge">✏️ ART CLASS</div>
+  <div class="header-badge">✏️ CLASS REPORT</div>
   <h1>수업 메이킹 일지 ✨</h1>
   <p>사진이랑 이름만 넣으면 리포트 완성! 인쇄해서 바로 드릴 수 있어요 🎨</p>
 </div>
@@ -775,7 +775,7 @@ function generateReport() {
   document.getElementById('report-page').innerHTML = `
     <div class="rpt-header">
       <div class="rpt-header-inner">
-        <div class="rpt-badge">🎨 ART CLASS · MAKING REPORT</div>
+        <div class="rpt-badge">🎨 CLASS REPORT</div>
         <div class="rpt-title" style="font-family: inherit">${projectName}</div>
       </div>
     </div>
@@ -889,7 +889,7 @@ async function exportWord() {
     spacing: { after: 100 },
   }));
   sections.push(new Paragraph({
-    children: [new TextRun({ text: "ART CLASS · MAKING REPORT", size: 14, color: "6b6b8a" })],
+    children: [new TextRun({ text: "CLASS REPORT", size: 14, color: "6b6b8a" })],
     alignment: AlignmentType.CENTER,
     spacing: { after: 150 },
   }));
