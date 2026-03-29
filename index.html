@@ -318,8 +318,8 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
         </div>
         <button class="btn-ai" onclick="generateAIComment(this)" style="background:linear-gradient(135deg,#c9b8ff,#9f7fff); color:#fff; border:none; padding:4px 10px; border-radius:12px; font-size:10px; font-weight:900; cursor:pointer; box-shadow: 2px 2px 0 rgba(30,30,46,0.15); transition: transform 0.1s;">✨ AI 자동 생성</button>
       </div>
-      <label>학생 소감</label>
-      <textarea id="student-comment" placeholder="예: 내 캐릭터가 살아있는 것 같아서 너무 신기했어요!" oninput="syncPreview()"></textarea>
+      <label>수업 활동 내용</label>
+      <textarea id="student-comment" placeholder="예: 첫 수업으로 구도 잡기 연습과 다양한 선 쓰기를 진행했습니다." oninput="syncPreview()"></textarea>
       <label>선생님 코멘트</label>
       <textarea id="teacher-comment" placeholder="예: 색감 선택이 굉장히 과감하고 독창적이었습니다." oninput="syncPreview()"></textarea>
     </div>
@@ -476,8 +476,8 @@ function generateReport() {
     if (studentCmt) commentsHTML += `
       <div class="rpt-comment rpt-comment-student">
         <div class="rpt-comment-sticker">🌟</div>
-        <div class="rpt-comment-who">학생 소감 · ${studentName}</div>
-        <div class="rpt-comment-text">"${studentCmt}"</div>
+        <div class="rpt-comment-who">수업 활동 내용 · ${studentName}</div>
+        <div class="rpt-comment-text">${studentCmt}</div>
       </div>`;
     if (teacherCmt) commentsHTML += `
       <div class="rpt-comment rpt-comment-teacher">
