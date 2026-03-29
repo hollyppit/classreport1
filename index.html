@@ -862,39 +862,39 @@ async function exportWord() {
 
   // 제목 및 부제
   sections.push(new Paragraph({
-    children: [new TextRun({ text: projectName, bold: true, size: 36 })],
+    children: [new TextRun({ text: projectName, bold: true, size: 28 })],
     heading: HeadingLevel.HEADING_1,
     alignment: AlignmentType.CENTER,
-    spacing: { after: 120 },
+    spacing: { after: 100 },
   }));
   sections.push(new Paragraph({
-    children: [new TextRun({ text: "ART CLASS · MAKING REPORT", size: 16, color: "6b6b8a" })],
+    children: [new TextRun({ text: "ART CLASS · MAKING REPORT", size: 14, color: "6b6b8a" })],
     alignment: AlignmentType.CENTER,
-    spacing: { after: 200 },
+    spacing: { after: 150 },
   }));
 
-  // 정보 표 (여긴 기존 그대로 상단 배치)
+  // 정보 표 (상단 배치)
   sections.push(new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     rows: [
       new TableRow({
         children: [
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "학생", bold: true, size: 20 })] })], shading: { fill: "f5f0e8" } }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: studentName, size: 20 })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "회차", bold: true, size: 20 })] })], shading: { fill: "f5f0e8" } }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: sessionInfo, size: 20 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "학생", bold: true, size: 16 })] })], shading: { fill: "f5f0e8" } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: studentName, size: 16 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "회차", bold: true, size: 16 })] })], shading: { fill: "f5f0e8" } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: sessionInfo, size: 16 })] })] }),
         ]
       }),
       new TableRow({
         children: [
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "날짜", bold: true, size: 20 })] })], shading: { fill: "f5f0e8" } }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: reportDate, size: 20 })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "담당", bold: true, size: 20 })] })], shading: { fill: "f5f0e8" } }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: teacherName, size: 20 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "날짜", bold: true, size: 16 })] })], shading: { fill: "f5f0e8" } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: reportDate, size: 16 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "담당", bold: true, size: 16 })] })], shading: { fill: "f5f0e8" } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: teacherName, size: 16 })] })] }),
         ]
       }),
     ],
-    spacing: { after: 250 },
+    spacing: { after: 200 },
   }));
 
   // 2단 레이아웃을 위한 구성 요소 수집
@@ -911,30 +911,41 @@ async function exportWord() {
   const activePhotos = photoKeys.filter(item => photos[item.key]);
   const photoCount = activePhotos.length;
   
-  const maxWidth = 280; // 픽셀 단위 최대 너비
+  // 크기 계산 로직
+  const maxWidth = 240; 
+  const maxHeight = photoCount > 0 ? (Math.floor(720 / photoCount) - 10) : 720;
 
   for (const item of activePhotos) {
     photoChildren.push(new Paragraph({
-      children: [new TextRun({ text: item.label, bold: true, size: 20, color: "111111" })],
-      spacing: { before: 150, after: 80 },
+      children: [new TextRun({ text: item.label, bold: true, size: 14, color: "111111" })],
+      spacing: { before: 100, after: 50 },
     }));
     try {
       const dataUrl = photos[item.key];
       const dims = await getImageDimensions(dataUrl);
       const ratio = dims.height / dims.width || 1;
-      const imgWidth = maxWidth;
-      const imgHeight = Math.round(maxWidth * ratio);
+
+      let finalWidth, finalHeight;
+      if (ratio > maxHeight / maxWidth) {
+        // 세로가 더 긴 경우: 높이 기준
+        finalHeight = maxHeight;
+        finalWidth = Math.round(maxHeight / ratio);
+      } else {
+        // 가로가 더 긴 경우: 너비 기준
+        finalWidth = maxWidth;
+        finalHeight = Math.round(maxWidth * ratio);
+      }
 
       const buffer = base64ToArrayBuffer(dataUrl);
       photoChildren.push(new Paragraph({
         children: [
           new ImageRun({
             data: buffer,
-            transformation: { width: imgWidth, height: imgHeight },
+            transformation: { width: finalWidth, height: finalHeight },
           }),
         ],
         alignment: AlignmentType.CENTER,
-        spacing: { after: 150 },
+        spacing: { after: 100 },
       }));
     } catch (e) {
       console.error("Image processing failed", e);
@@ -944,27 +955,27 @@ async function exportWord() {
   // 2. 코멘트들 수집
   if (studentCmt) {
     commentChildren.push(new Paragraph({
-      children: [new TextRun({ text: "💬 수업 활동 내용", bold: true, size: 20, color: "8b6fff" })],
-      spacing: { before: 150, after: 80 },
+      children: [new TextRun({ text: "💬 수업 활동 내용", bold: true, size: 16, color: "8b6fff" })],
+      spacing: { before: 100, after: 50 },
     }));
     commentChildren.push(new Paragraph({
-      children: [new TextRun({ text: studentCmt, size: 18 })],
-      spacing: { after: 150 },
+      children: [new TextRun({ text: studentCmt, size: 16 })],
+      spacing: { after: 100 },
     }));
   }
 
   if (teacherCmt) {
     commentChildren.push(new Paragraph({
-      children: [new TextRun({ text: "✍️ 선생님 코멘트", bold: true, size: 20, color: "4dddbc" })],
-      spacing: { before: 150, after: 80 },
+      children: [new TextRun({ text: "✍️ 선생님 코멘트", bold: true, size: 16, color: "4dddbc" })],
+      spacing: { before: 100, after: 50 },
     }));
     commentChildren.push(new Paragraph({
-      children: [new TextRun({ text: teacherCmt, size: 18 })],
-      spacing: { after: 150 },
+      children: [new TextRun({ text: teacherCmt, size: 16 })],
+      spacing: { after: 100 },
     }));
   }
 
-  // 2단 표 생성 (테두리 없음)
+  // 2단 표 생성
   sections.push(new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     borders: {
@@ -998,7 +1009,7 @@ async function exportWord() {
       properties: {
         page: {
           size: { width: 12240, height: 15840 }, // A4
-          margin: { top: 720, right: 720, bottom: 720, left: 720 } 
+          margin: { top: 500, right: 500, bottom: 500, left: 500 } 
         }
       },
       children: sections,
