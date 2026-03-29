@@ -285,13 +285,35 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 
 /* 인쇄 */
 @media print {
-  @page { size: A4 portrait; margin: 10mm; }
-  body > * { display: none !important; }
-  .editor-wrap { display: flex !important; }
-  .input-panel { display: none !important; }
-  .preview-panel { display: block !important; }
-  .preview-scroll { background: white !important; padding: 0 !important; border: none !important; max-height: none !important; overflow: visible !important; }
-  #report-page { box-shadow: none !important; border: none !important; }
+  @page { size: A4 portrait; margin: 0; }
+  
+  /* 앱 UI 전부 숨김 */
+  .app-header,
+  .input-panel,
+  .preview-label,
+  .font-tabs,
+  .preview-scroll > *:not(#report-page) { display: none !important; }
+  
+  body { margin: 0; padding: 0; background: white; }
+  
+  .editor-wrap { display: block !important; }
+  .preview-panel { display: block !important; width: 100% !important; }
+  .preview-scroll { 
+    display: block !important; 
+    background: white !important; 
+    padding: 0 !important; 
+    border: none !important; 
+    border-radius: 0 !important;
+    max-height: none !important; 
+    overflow: visible !important; 
+  }
+  
+  #report-page { 
+    box-shadow: none !important; 
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
 }
 @media (max-width: 900px) {
   .editor-wrap { flex-direction: column; }
