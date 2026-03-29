@@ -37,34 +37,54 @@ export async function onRequestPost(context) {
     let resultImage = null;
 
     if (type === 'generate') {
-      // 1. 이미지 생성 (Gemini 2.0 Flash Image Generation 전용 모델 사용)
-      const model = 'gemini-2.0-flash-preview-image-generation';
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      // --- '운명의 거울' 프로젝트 방식의 멀티 모델 폴백 로직 이식 ---
+      const models = [
+        'gemini-2.5-flash-image',
+        'gemini-3.1-flash-image-preview',
+        'gemini-3-pro-image-preview'
+      ];
       
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: finalPrompt }] }],
-          generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
-        })
-      });
+      let lastError = '';
 
-      const resJson = await response.json();
-      if (!response.ok) {
-        console.error('Gemini Image Gen Error:', resJson);
-        throw new Error(resJson.error?.message || '이미지 생성 실패');
+      for (const model of models) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: finalPrompt }] }],
+              generationConfig: { responseModalities: ['IMAGE'] }
+            })
+          });
+
+          const resJson = await response.json();
+
+          if (!response.ok) {
+            const errTxt = resJson.error?.message || '실패';
+            throw new Error(`[${model}] ${errTxt}`);
+          }
+
+          const imagePart = resJson.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+          if (imagePart) {
+            resultImage = `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
+            break; // 성공 시 루프 중단
+          } else {
+            throw new Error(`[${model}] 이미지 데이터를 찾을 수 없습니다`);
+          }
+        } catch (e) {
+          lastError += e.message + ' | ';
+          console.warn(`${model} 시도 실패:`, e.message);
+        }
       }
 
-      const imagePart = resJson.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-      if (imagePart) {
-        resultImage = `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
-      } else {
-        throw new Error('생성된 이미지를 찾을 수 없습니다.');
+      if (!resultImage) {
+        throw new Error('모든 Gemini 모델 시도 실패: ' + lastError);
       }
 
     } else if (type === 'upscale' && image) {
-      // 2. 이미지 기반 퀄업 (기존 Gemini 멀티모달 사용)
+      // 2. 이미지 기반 퀄업 (기존 구조 유지하되 에러 처리 강화)
       const model = 'gemini-2.0-flash-exp';
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
       
