@@ -294,10 +294,14 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
       <div class="card-title">
         <div class="card-title-dot" style="background:var(--mint)"></div>사진 업로드
       </div>
-      <div class="photo-card">
+      <div class="photo-card" id="card-storyboard">
         <input type="file" accept="image/*" onchange="handlePhoto(this,'storyboard')">
         <div id="icon-storyboard" class="photo-icon-wrap" style="background:#fff9e6;">✏️</div>
         <div class="photo-info"><strong>원본</strong><span>손 스케치 또는 기획 사진</span></div>
+      </div>
+      <div style="display:flex; gap:8px; margin-bottom:14px;">
+        <button class="btn-secondary" style="flex:1; margin-top:0; font-size:11px; padding:8px;" onclick="imagineAI(this, 'generate')">✨ AI로 그림 만들기</button>
+        <button id="btn-qualup" class="btn-secondary" style="flex:1; margin-top:0; font-size:11px; padding:8px; opacity:0.5;" onclick="imagineAI(this, 'upscale')" disabled>🎨 AI로 퀄업하기</button>
       </div>
       <div class="photo-card">
         <input type="file" accept="image/*" onchange="handlePhoto(this,'process')">
@@ -350,12 +354,69 @@ function handlePhoto(input, key) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
-    photos[key] = e.target.result;
-    const el = document.getElementById('icon-' + key);
-    el.outerHTML = `<img id="icon-${key}" class="thumb" src="${e.target.result}" alt="">`;
-    syncPreview();
+    updatePhoto(key, e.target.result);
   };
   reader.readAsDataURL(file);
+}
+
+function updatePhoto(key, dataUrl) {
+  photos[key] = dataUrl;
+  const el = document.getElementById('icon-' + key);
+  if (el) {
+    el.outerHTML = `<img id="icon-${key}" class="thumb" src="${dataUrl}" alt="">`;
+  }
+  if (key === 'storyboard') {
+    const qualBtn = document.getElementById('btn-qualup');
+    qualBtn.disabled = false;
+    qualBtn.style.opacity = "1";
+  }
+  syncPreview();
+}
+
+async function imagineAI(btn, type) {
+  const originalText = btn.innerHTML;
+  btn.innerHTML = "그림 그리는 중... 🎨";
+  btn.disabled = true;
+
+  try {
+    const studentComment = document.getElementById('student-comment').value;
+
+    if (type === 'generate' && !studentComment) {
+      alert('그림 생성을 위해 "수업 활동 내용"을 먼저 적어주세요! (아이의 성향을 분석하기 위해 필요해요)');
+      return;
+    }
+
+    if (type === 'upscale' && !photos.storyboard) {
+      alert('퀄업할 원본 이미지를 먼저 업로드하거나 생성해 주세요!');
+      return;
+    }
+
+    const body = { 
+      type: type, 
+      studentComment: studentComment,
+      image: (type === 'upscale') ? photos.storyboard : null
+    };
+
+    const res = await fetch('/api/imagine', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) throw new Error('AI 그림 처리 중 오류가 발생했습니다.');
+    
+    const result = await res.json();
+    if (result.image) {
+      // 퀄업이든 생성이든 '원본(storyboard)' 자리에 채움 (사용자 요청: 원본을 덮어씌워줘)
+      updatePhoto('storyboard', result.image);
+    }
+  } catch (e) {
+    console.error(e);
+    alert('그림 작업에 실패했습니다. (GEMINI_API_KEY 설정을 확인해 주세요)');
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
 }
 
 function syncPreview() { generateReport(); }
