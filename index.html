@@ -284,15 +284,14 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 .font-tab.active { background: var(--ink) !important; color: white !important; transform: none; box-shadow: none; }
 
 /* 인쇄 */
-@page { size: A4 portrait; margin: 0; }
 @media print {
-  html, body { margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  .app-header, .input-panel, .preview-label, .font-tabs { display: none !important; }
-  .editor-wrap { display: block !important; margin: 0 !important; padding: 0 !important; max-width: none !important; border: none !important; }
-  .preview-panel { margin: 0 !important; padding: 0 !important; border: none !important; }
-  .preview-scroll { display: block !important; background: white !important; padding: 0 !important; border: none !important; max-height: none !important; overflow: visible !important; }
-  #report-page { box-shadow: none !important; border: none !important; margin: 0 !important; transform-origin: top left; overflow: visible !important; }
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  @page { size: A4 portrait; margin: 10mm; }
+  body > * { display: none !important; }
+  .editor-wrap { display: flex !important; }
+  .input-panel { display: none !important; }
+  .preview-panel { display: block !important; }
+  .preview-scroll { background: white !important; padding: 0 !important; border: none !important; max-height: none !important; overflow: visible !important; }
+  #report-page { box-shadow: none !important; border: none !important; }
 }
 @media (max-width: 900px) {
   .editor-wrap { flex-direction: column; }
@@ -776,17 +775,23 @@ function downloadReport() {
   generateReport();
   setTimeout(() => {
     const page = document.getElementById('report-page');
-    page.style.minHeight = 'auto';
-    page.style.overflow = 'visible';
     
-    const totalHeight = page.scrollHeight;
-    const a4Height = 1050; // 여백 감안해서 1123보다 작게
+    // 스케일 초기화
+    page.style.transform = '';
+    page.style.width = '';
+    page.style.height = '';
     
-    if (totalHeight > a4Height) {
-      const scale = a4Height / totalHeight;
-      page.style.transform = `scale(${scale})`;
+    // 실제 높이 측정
+    const naturalHeight = page.scrollHeight;
+    const targetHeight = 980; // A4 실출력 높이 (여백 포함)
+    
+    if (naturalHeight > targetHeight) {
+      const scale = targetHeight / naturalHeight;
       page.style.transformOrigin = 'top left';
-      page.style.width = `${Math.round(100 / scale)}%`;
+      page.style.transform = `scale(${scale})`;
+      page.style.width = (794 / scale) + 'px';
+      page.style.height = targetHeight + 'px';
+      page.style.overflow = 'hidden';
     }
     
     window.print();
@@ -795,10 +800,10 @@ function downloadReport() {
       page.style.transform = '';
       page.style.transformOrigin = '';
       page.style.width = '';
-      page.style.minHeight = '';
+      page.style.height = '';
       page.style.overflow = '';
-    }, 1000);
-  }, 400);
+    }, 1500);
+  }, 500);
 }
 
 function changeReportFont(fontName, btn) {
