@@ -261,6 +261,28 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
   .input-panel { width: 100%; }
   #report-page { width: 100%; min-height: auto; }
 }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(30,30,46,0.5);
+  backdrop-filter: blur(4px); z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-content {
+  width: 90%; max-width: 450px; background: var(--panel);
+  border: 2px solid var(--ink); border-radius: 20px;
+  box-shadow: 8px 8px 0 var(--ink); padding: 24px;
+  transform: translateY(20px); transition: transform 0.3s;
+}
+.modal-overlay.active .modal-content { transform: translateY(0); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.modal-header h2 { font-family: 'Gaegu', cursive; font-size: 24px; color: var(--ink); }
+.modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--mid); line-height: 1; }
+.modal-body label { margin-top: 12px; display: block; }
+.modal-loading { text-align: center; padding: 40px 0; display: none; }
+.modal-loading-icon { font-size: 48px; margin-bottom: 16px; animation: bounce 1s infinite ease-in-out; }
 </style>
 </head>
 <body>
@@ -300,7 +322,7 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
         <div class="photo-info"><strong>원본</strong><span>손 스케치 또는 기획 사진</span></div>
       </div>
       <div style="display:flex; gap:8px; margin-bottom:14px;">
-        <button class="btn-secondary" style="flex:1; margin-top:0; font-size:11px; padding:8px;" onclick="imagineAI(this, 'generate')">✨ AI로 그림 만들기</button>
+        <button class="btn-secondary" style="flex:1; margin-top:0; font-size:11px; padding:8px;" onclick="openProfileModal()">✨ AI로 그림 만들기</button>
         <button id="btn-qualup" class="btn-secondary" style="flex:1; margin-top:0; font-size:11px; padding:8px; opacity:0.5;" onclick="imagineAI(this, 'upscale')" disabled>🎨 AI로 퀄업하기</button>
       </div>
       <div class="photo-card">
@@ -346,8 +368,94 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
   </div>
 </div>
 
+<div id="profile-modal" class="modal-overlay">
+  <div class="modal-content">
+    <div id="modal-form-view">
+      <div class="modal-header">
+        <h2>✨ 아이 성향 입력</h2>
+        <button class="modal-close" onclick="closeProfileModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:12px; color:var(--mid); margin-bottom:16px;">아이의 관심사를 알려주시면 Claude가 분석하고 Gemini가 그림을 그려요!</p>
+        <label>좋아하는 캐릭터/만화/게임</label>
+        <input type="text" id="p-favorite" placeholder="예: 피카츄, 마인크래프트">
+        <label>취미나 좋아하는 활동</label>
+        <input type="text" id="p-hobby" placeholder="예: 축구, 종이접기">
+        <label>장래희망</label>
+        <input type="text" id="p-dream" placeholder="예: 과학자, 화가">
+        <label>기타 특징</label>
+        <input type="text" id="p-etc" placeholder="예: 활발함, 분홍색 좋아함, 강아지 키움">
+        <button class="btn-primary" style="margin-top:20px;" onclick="generateFromProfile()">그림 생성하기 🎨</button>
+      </div>
+    </div>
+    <div id="modal-loading-view" class="modal-loading">
+      <div class="modal-loading-icon">🎨</div>
+      <p style="font-weight:700; color:var(--ink); font-size:16px;">이 아이의 그림을 상상하는 중... ✨</p>
+      <p style="font-size:12px; color:var(--mid); margin-top:10px;">Claude와 Gemini가 협업하고 있어요!</p>
+    </div>
+  </div>
+</div>
+
 <script>
 const photos = { storyboard: null, process: null, final: null };
+
+function openProfileModal() {
+  document.getElementById('profile-modal').classList.add('active');
+  document.getElementById('modal-form-view').style.display = 'block';
+  document.getElementById('modal-loading-view').style.display = 'none';
+}
+
+function closeProfileModal() {
+  document.getElementById('profile-modal').classList.remove('active');
+}
+
+async function generateFromProfile() {
+  const formView = document.getElementById('modal-form-view');
+  const loadingView = document.getElementById('modal-loading-view');
+  
+  const profile = {
+    favorite: document.getElementById('p-favorite').value,
+    hobby: document.getElementById('p-hobby').value,
+    dream: document.getElementById('p-dream').value,
+    etc: document.getElementById('p-etc').value
+  };
+
+  formView.style.display = 'none';
+  loadingView.style.display = 'block';
+
+  try {
+    // 1단계: Claude(/api/generate)로 성향 분석 및 영문 프롬프트 생성
+    const genRes = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'analyze_profile', profile: profile })
+    });
+    if (!genRes.ok) throw new Error('성향 분석 실패');
+    const { prompt: rawPrompt } = await genRes.json();
+
+    // 2단계: 프롬프트 조합 (사용자 요청 스타일 지시어 추가)
+    const finalPrompt = `${rawPrompt}, drawn by a Korean elementary school child, crayon or colored pencil style, slightly crooked and cute lines, on white paper, warm and cheerful`;
+
+    // 3단계: Gemini(/api/imagine)로 이미지 생성
+    const imgRes = await fetch('/api/imagine', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'generate', prompt: finalPrompt })
+    });
+    if (!imgRes.ok) throw new Error('이미지 생성 실패');
+    const { image } = await imgRes.json();
+
+    if (image) {
+      updatePhoto('storyboard', image);
+      closeProfileModal();
+    }
+  } catch (e) {
+    console.error(e);
+    alert('그림 생성 중 오류가 발생했습니다.');
+    formView.style.display = 'block';
+    loadingView.style.display = 'none';
+  }
+}
 
 function handlePhoto(input, key) {
   const file = input.files[0];
