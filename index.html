@@ -200,15 +200,11 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 .rpt-photos.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
 
 .rpt-photo-cell {
-  border-radius: 14px; overflow: hidden; aspect-ratio: 16/9;
+  border-radius: 14px; overflow: hidden;
   position: relative; border: 2px solid var(--ink); width: 100%;
+  background: #f8f6f2; display: flex; align-items: center; justify-content: center;
 }
-.rpt-photo-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.rpt-photo-label {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: linear-gradient(transparent, rgba(30,30,46,0.7));
-  padding: 18px 10px 8px; font-size: 10px; font-weight: 700; color: #fff;
-}
+.rpt-photo-cell img { width: 100%; height: auto; max-height: 450px; object-fit: contain; display: block; }
 .rpt-photo-empty {
   width: 100%; height: 100%; background: var(--light);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -621,26 +617,51 @@ function generateReport() {
   const teacherCmt  = document.getElementById('teacher-comment').value;
 
   // 좌측 60% (사진 세로 나열)
-  let photosHTML = `<div style="width: 60%; display: flex; flex-direction: column; gap: 14px;">`;
-  photosHTML += `
-    <div class="rpt-sec" style="margin-top:0;">
-      <div class="rpt-sec-pill" style="color:#ff6b6b;border-color:#ff6b6b;">🖼️ 작업 기록</div>
-      <div class="rpt-sec-line" style="background:#ffd6d6;"></div>
-    </div>
-  `;
+  const hasStoryboard = !!photos.storyboard;
+  const hasProcess = !!photos.process;
+  const hasFinal = !!photos.final;
+  const hasAnyPhoto = hasStoryboard || hasProcess || hasFinal;
 
-  const addPhoto = (src, icon, label) => {
-    if (src) return `<div class="rpt-photo-cell"><img src="${src}" alt="${label}"><div class="rpt-photo-label">${icon} ${label}</div></div>`;
-    return `<div class="rpt-photo-cell"><div class="rpt-photo-empty"><div class="rpt-photo-empty-icon">${icon}</div>${label}</div></div>`;
-  };
+  let photosHTML = '';
+  if (hasAnyPhoto) {
+    photosHTML = `<div style="width: 60%; display: flex; flex-direction: column; gap: 14px;">`;
+    
+    // 1. 작업 기록 (원본 / 최종) 비교 섹션
+    if (hasStoryboard || hasFinal) {
+      photosHTML += `
+        <div class="rpt-sec" style="margin-top:0;">
+          <div class="rpt-sec-pill" style="color:#ff6b6b;border-color:#ff6b6b;">🖼️ 작업 기록</div>
+          <div class="rpt-sec-line" style="background:#ffd6d6;"></div>
+        </div>
+      `;
+      // 두 장 다 있으면 나란히 또는 세로? 요청은 '둘 중 하나만 있으면 전체 너비'
+      // 여기서는 세로로 나열하되 있으면 보여주는 방식으로 처리 (기존 구조)
+      if (hasStoryboard) {
+        photosHTML += `<div class="rpt-photo-cell"><img src="${photos.storyboard}"></div>`;
+      }
+      if (hasFinal) {
+        photosHTML += `<div class="rpt-photo-cell"><img src="${photos.final}"></div>`;
+      }
+    }
 
-  photosHTML += addPhoto(photos.storyboard, '✏️', '원본');
-  photosHTML += addPhoto(photos.process, '🎨', '수업 중간 모습');
-  photosHTML += addPhoto(photos.final, '⭐', '최종 완성본');
-  photosHTML += `</div>`;
+    // 2. 수업 과정 섹션
+    if (hasProcess) {
+      photosHTML += `
+        <div class="rpt-sec">
+          <div class="rpt-sec-pill" style="color:#4dddbc;border-color:#4dddbc;">🎨 수업 과정</div>
+          <div class="rpt-sec-line" style="background:#edfff9;"></div>
+        </div>
+        <div class="rpt-photo-cell"><img src="${photos.process}"></div>
+      `;
+    }
+
+    photosHTML += `</div>`;
+  }
 
   // 우측 40% (코멘트)
-  let commentsHTML = `<div style="width: 40%; display: flex; flex-direction: column; gap: 10px;">`;
+  // 우측 코멘트 (사진 유무에 따라 너비 100% 또는 40%)
+  const commentWidth = hasAnyPhoto ? '40%' : '100%';
+  let commentsHTML = `<div style="width: ${commentWidth}; display: flex; flex-direction: column; gap: 10px;">`;
   commentsHTML += `
     <div class="rpt-sec" style="margin-top:0;">
       <div class="rpt-sec-pill" style="color:#8b6fff;border-color:#c9b8ff;">💬 수업 코멘트</div>
