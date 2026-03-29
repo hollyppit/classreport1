@@ -813,6 +813,16 @@ function changeReportFont(fontName, btn) {
   syncPreview();
 }
 
+function base64ToArrayBuffer(base64) {
+  const base64Data = base64.split(',')[1];
+  const binaryString = atob(base64Data);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
 async function exportWord() {
   const { Document, Paragraph, TextRun, ImageRun, HeadingLevel, AlignmentType, Packer, Table, TableRow, TableCell, WidthType, BorderStyle } = window.docx;
   
@@ -828,15 +838,15 @@ async function exportWord() {
 
   // 제목 및 부제
   sections.push(new Paragraph({
-    children: [new TextRun({ text: projectName, bold: true, size: 48 })],
+    children: [new TextRun({ text: projectName, bold: true, size: 36 })],
     heading: HeadingLevel.HEADING_1,
     alignment: AlignmentType.CENTER,
-    spacing: { after: 200 },
+    spacing: { after: 120 },
   }));
   sections.push(new Paragraph({
-    children: [new TextRun({ text: "ART CLASS · MAKING REPORT", size: 20, color: "6b6b8a" })],
+    children: [new TextRun({ text: "ART CLASS · MAKING REPORT", size: 16, color: "6b6b8a" })],
     alignment: AlignmentType.CENTER,
-    spacing: { after: 400 },
+    spacing: { after: 200 },
   }));
 
   // 정보 표
@@ -845,87 +855,91 @@ async function exportWord() {
     rows: [
       new TableRow({
         children: [
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "학생", bold: true, size: 24 })] })], shading: { fill: "f5f0e8" } }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: studentName, size: 24 })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "회차", bold: true, size: 24 })] })], shading: { fill: "f5f0e8" } }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: sessionInfo, size: 24 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "학생", bold: true, size: 20 })] })], shading: { fill: "f5f0e8" } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: studentName, size: 20 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "회차", bold: true, size: 20 })] })], shading: { fill: "f5f0e8" } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: sessionInfo, size: 20 })] })] }),
         ]
       }),
       new TableRow({
         children: [
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "날짜", bold: true, size: 24 })] })], shading: { fill: "f5f0e8" } }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: reportDate, size: 24 })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "담당", bold: true, size: 24 })] })], shading: { fill: "f5f0e8" } }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: teacherName, size: 24 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "날짜", bold: true, size: 20 })] })], shading: { fill: "f5f0e8" } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: reportDate, size: 20 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "담당", bold: true, size: 20 })] })], shading: { fill: "f5f0e8" } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: teacherName, size: 20 })] })] }),
         ]
       }),
     ],
-    spacing: { after: 400 },
+    spacing: { after: 200 },
   }));
 
-  // 이미지 변환 헬퍼
-  const getBuffer = async (url) => {
-    const res = await fetch(url);
-    return await res.arrayBuffer();
-  };
-
-  // 사진들
+  // 사진들 레이아웃 계산
   const photoKeys = [
     { key: 'storyboard', label: '🖼️ 작업 기록 (원본/기획)' },
     { key: 'final', label: '⭐ 작업 기록 (최종 완성본)' },
     { key: 'process', label: '🎨 수업 과정' }
   ];
+  
+  const activePhotos = photoKeys.filter(item => photos[item.key]);
+  const photoCount = activePhotos.length;
+  
+  let imgWidth = 250, imgHeight = 170;
+  if (photoCount === 1) { imgWidth = 400; imgHeight = 280; }
+  else if (photoCount === 2) { imgWidth = 300; imgHeight = 200; }
 
-  for (const item of photoKeys) {
-    if (photos[item.key]) {
+  for (const item of activePhotos) {
+    sections.push(new Paragraph({
+      children: [new TextRun({ text: item.label, bold: true, size: 20, color: "111111" })],
+      spacing: { before: 200, after: 100 },
+    }));
+    try {
+      const buffer = base64ToArrayBuffer(photos[item.key]);
       sections.push(new Paragraph({
-        children: [new TextRun({ text: item.label, bold: true, size: 28, color: "111111" })],
-        spacing: { before: 400, after: 200 },
+        children: [
+          new ImageRun({
+            data: buffer,
+            transformation: { width: imgWidth, height: imgHeight },
+          }),
+        ],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 150 },
       }));
-      try {
-        const buffer = await getBuffer(photos[item.key]);
-        sections.push(new Paragraph({
-          children: [
-            new ImageRun({
-              data: buffer,
-              transformation: { width: 500, height: 281 }, // 16:9 비율 유지
-            }),
-          ],
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 300 },
-        }));
-      } catch (e) {
-        console.error("Image load failed", e);
-      }
+    } catch (e) {
+      console.error("Image processing failed", e);
     }
   }
 
   // 코멘트
   if (studentCmt) {
     sections.push(new Paragraph({
-      children: [new TextRun({ text: "💬 수업 활동 내용", bold: true, size: 28, color: "8b6fff" })],
-      spacing: { before: 400, after: 200 },
+      children: [new TextRun({ text: "💬 수업 활동 내용", bold: true, size: 20, color: "8b6fff" })],
+      spacing: { before: 200, after: 100 },
     }));
     sections.push(new Paragraph({
-      children: [new TextRun({ text: studentCmt, size: 24 })],
-      spacing: { after: 300 },
+      children: [new TextRun({ text: studentCmt, size: 18 })],
+      spacing: { after: 150 },
     }));
   }
 
   if (teacherCmt) {
     sections.push(new Paragraph({
-      children: [new TextRun({ text: "✍️ 선생님 코멘트", bold: true, size: 28, color: "4dddbc" })],
-      spacing: { before: 400, after: 200 },
+      children: [new TextRun({ text: "✍️ 선생님 코멘트", bold: true, size: 20, color: "4dddbc" })],
+      spacing: { before: 200, after: 100 },
     }));
     sections.push(new Paragraph({
-      children: [new TextRun({ text: teacherCmt, size: 24 })],
-      spacing: { after: 300 },
+      children: [new TextRun({ text: teacherCmt, size: 18 })],
+      spacing: { after: 150 },
     }));
   }
 
   const doc = new Document({
     sections: [{
-      properties: {},
+      properties: {
+        page: {
+          size: { width: 12240, height: 15840 }, // A4
+          margin: { top: 720, right: 720, bottom: 720, left: 720 } // 0.5인치 여백
+        }
+      },
       children: sections,
     }],
   });
