@@ -15,7 +15,8 @@ function corsHeaders() {
   };
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost(context) {
+  const { request, env } = context;
   try {
     const { type, prompt, image, studentComment } = await request.json();
     const apiKey = env.GEMINI_API_KEY;

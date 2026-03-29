@@ -77,7 +77,8 @@ async function callAI(prompt, env, systemPrompt, isJson = true) {
   return result;
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost(context) {
+  const { request, env } = context;
   try {
     const data = await request.json();
 
