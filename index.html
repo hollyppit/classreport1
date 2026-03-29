@@ -6,7 +6,34 @@
 <title>수업 메이킹 일지</title>
 <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Myeongjo:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Cafe24Ohsquare&family=Cafe24Ssurround&family=Cafe24SsurroundAir&family=Cafe24Shiningstar&family=Cafe24Simplehae&family=Cafe24Dongdong&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Myeongjo:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+/* 카페24 폰트 개별 정의 (Noonnu CDN) */
+@font-face {
+    font-family: 'Cafe24Ohsquare';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/Cafe24Ohsquare.woff') format('woff');
+    font-weight: normal; font-style: normal;
+}
+@font-face {
+    font-family: 'Cafe24Ssurround';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24Ssurround.woff') format('woff');
+    font-weight: normal; font-style: normal;
+}
+@font-face {
+    font-family: 'Cafe24Dongdong';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Dongdong.woff') format('woff');
+    font-weight: normal; font-style: normal;
+}
+@font-face {
+    font-family: 'Cafe24Simplehae';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Simplehae.woff') format('woff');
+    font-weight: normal; font-style: normal;
+}
+@font-face {
+    font-family: 'Cafe24Shiningstar';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Shiningstar.woff') format('woff');
+    font-weight: normal; font-style: normal;
+}
 
 :root {
   --bg: #fffbf0;
@@ -140,7 +167,7 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 
 /* ── A4 리포트 ── */
 #report-page {
-  --rpt-font: 'Cafe24Ohsquare', sans-serif;
+  --rpt-font: 'Cafe24Ohsquare';
   width: 794px; min-height: 1123px;
   background: #ffffff;
   margin: 0 auto; font-family: var(--rpt-font);
