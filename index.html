@@ -417,6 +417,7 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 
 <script>
 const photos = { storyboard: null, process: null, final: null };
+let currentFont = 'Cafe24Ohsquare'; // 현재 선택된 폰트
 
 function openProfileModal() {
   document.getElementById('profile-modal').classList.add('active');
@@ -631,6 +632,9 @@ async function generateAIComment(btn) {
 }
 
 function generateReport() {
+  const page = document.getElementById('report-page');
+  if (currentFont) page.style.fontFamily = currentFont;
+
   const projectName = document.getElementById('project-name').value || '수업 메이킹 일지';
   const studentName = document.getElementById('student-name').value || '학생';
   const sessionInfo = document.getElementById('session-info').value || '-';
@@ -720,19 +724,19 @@ function generateReport() {
     <div class="rpt-header">
       <div class="rpt-header-inner">
         <div class="rpt-badge">🎨 ART CLASS · MAKING REPORT</div>
-        <div class="rpt-title">${projectName}</div>
+        <div class="rpt-title" style="font-family: inherit">${projectName}</div>
       </div>
     </div>
     <div class="rpt-meta">
-      ${metaItems.map(m=>`<div class="rpt-meta-item"><div class="rpt-meta-key">${m.key}</div><div class="rpt-meta-val">${m.val}</div></div>`).join('')}
+      ${metaItems.map(m=>`<div class="rpt-meta-item"><div class="rpt-meta-key">${m.key}</div><div class="rpt-meta-val" style="font-family: inherit">${m.val}</div></div>`).join('')}
     </div>
-    <div class="rpt-body">
+    <div class="rpt-body" style="font-family: inherit">
       ${photosHTML}
       ${commentsHTML}
     </div>
     <div class="rpt-footer">
       <div class="rpt-footer-left"><div class="rpt-footer-dot"></div>Making Report</div>
-      <div class="rpt-footer-right">${projectName} · ${studentName}</div>
+      <div class="rpt-footer-right" style="font-family: inherit">${projectName} · ${studentName}</div>
     </div>`;
 }
 
@@ -766,8 +770,9 @@ function downloadReport() {
 }
 
 function changeReportFont(fontName, btn) {
+  currentFont = fontName;
   const page = document.getElementById('report-page');
-  page.style.setProperty('--rpt-font', fontName);
+  page.style.fontFamily = currentFont;
   
   // 탭 활성화 상태 변경
   document.querySelectorAll('.font-tab').forEach(t => t.classList.remove('active'));
