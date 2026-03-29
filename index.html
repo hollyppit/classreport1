@@ -5,14 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수업 메이킹 일지</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Nanum+Myeongjo:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
-
-@font-face {
-    font-family: 'Cafe24Anemone';
-    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Anemone.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-}
+@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Myeongjo:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Cafe24Ohsquare&family=Cafe24Ssurround&family=Cafe24SsurroundAir&family=Cafe24Shiningstar&family=Cafe24Simplehae&family=Cafe24Dongdong&display=swap');
 
 :root {
   --bg: #fffbf0;
@@ -146,7 +139,7 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 
 /* ── A4 리포트 ── */
 #report-page {
-  --rpt-font: 'Noto Sans KR', sans-serif;
+  --rpt-font: 'Cafe24Ohsquare', sans-serif;
   width: 794px; min-height: 1123px;
   background: #ffffff;
   margin: 0 auto; font-family: var(--rpt-font);
@@ -251,12 +244,13 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
 
 /* 폰트 탭 */
-.font-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+.font-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
 .font-tab {
-  flex: 1; padding: 10px; background: white; color: var(--ink);
+  flex: 1 1 calc(25% - 8px); min-width: 60px; padding: 8px 4px; background: white; color: var(--ink);
   border: 2px solid var(--ink); border-radius: 12px;
-  font-size: 12px; font-weight: 800; cursor: pointer;
+  font-size: 11px; font-weight: 800; cursor: pointer;
   transition: all 0.2s; box-shadow: 2px 2px 0 var(--ink);
+  text-align: center;
 }
 .font-tab:hover { transform: translateY(-2px); }
 .font-tab.active { background: var(--ink) !important; color: white !important; transform: none; box-shadow: none; }
@@ -372,10 +366,14 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
   <div class="preview-panel">
     <div class="preview-label">미리보기</div>
     <div class="font-tabs">
-      <button class="font-tab active" onclick="changeReportFont('\'Noto Sans KR\', sans-serif', this)">고딕</button>
+      <button class="font-tab" onclick="changeReportFont('\'Noto Sans KR\', sans-serif', this)">고딕</button>
       <button class="font-tab" onclick="changeReportFont('\'Gaegu\', cursive', this)">손글씨</button>
-      <button class="font-tab" onclick="changeReportFont('\'Jua\', sans-serif', this)">동글동글</button>
       <button class="font-tab" onclick="changeReportFont('\'Nanum Myeongjo\', serif', this)">명조</button>
+      <button class="font-tab active" onclick="changeReportFont('\'Cafe24Ohsquare\'', this)">단정해</button>
+      <button class="font-tab" onclick="changeReportFont('\'Cafe24Ssurround\'', this)">쑥쑥</button>
+      <button class="font-tab" onclick="changeReportFont('\'Cafe24Dongdong\'', this)">동동</button>
+      <button class="font-tab" onclick="changeReportFont('\'Cafe24Simplehae\'', this)">심플해</button>
+      <button class="font-tab" onclick="changeReportFont('\'Cafe24Shiningstar\'', this)">빛나는별</button>
     </div>
     <div class="preview-scroll">
       <div id="report-page">
