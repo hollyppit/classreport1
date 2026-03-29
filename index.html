@@ -794,8 +794,14 @@ function generateReport() {
 
 
 
-function downloadReport() {
+async function downloadReport() {
   generateReport();
+  
+  // 폰트가 로드될 때까지 대기
+  try {
+    await document.fonts.ready;
+  } catch(e) {}
+
   setTimeout(() => {
     const page = document.getElementById('report-page');
     const originalParent = page.parentNode;
@@ -828,7 +834,7 @@ function downloadReport() {
       originalParent.insertBefore(page, placeholder);
       placeholder.remove();
     }, 1500);
-  }, 400);
+  }, 500);
 }
 
 function changeReportFont(fontName, btn) {
