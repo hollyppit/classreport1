@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수업 메이킹 일지</title>
+<link rel="preload" href="https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/Cafe24Ohsquare.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24Ssurround.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Dongdong.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Simplehae.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Shiningstar.woff" as="font" type="font/woff" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Myeongjo:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
@@ -12,27 +17,27 @@
 @font-face {
     font-family: 'Cafe24Ohsquare';
     src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/Cafe24Ohsquare.woff') format('woff');
-    font-weight: normal; font-style: normal;
+    font-weight: normal; font-style: normal; font-display: block;
 }
 @font-face {
     font-family: 'Cafe24Ssurround';
     src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24Ssurround.woff') format('woff');
-    font-weight: normal; font-style: normal;
+    font-weight: normal; font-style: normal; font-display: block;
 }
 @font-face {
     font-family: 'Cafe24Dongdong';
     src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Dongdong.woff') format('woff');
-    font-weight: normal; font-style: normal;
+    font-weight: normal; font-style: normal; font-display: block;
 }
 @font-face {
     font-family: 'Cafe24Simplehae';
     src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Simplehae.woff') format('woff');
-    font-weight: normal; font-style: normal;
+    font-weight: normal; font-style: normal; font-display: block;
 }
 @font-face {
     font-family: 'Cafe24Shiningstar';
     src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Shiningstar.woff') format('woff');
-    font-weight: normal; font-style: normal;
+    font-weight: normal; font-style: normal; font-display: block;
 }
 
 :root {
@@ -782,8 +787,14 @@ function generateReport() {
 
 
 
-function downloadReport() {
+async function downloadReport() {
   generateReport();
+  
+  // 폰트가 로드될 때까지 대기
+  try {
+    await document.fonts.ready;
+  } catch(e) {}
+
   setTimeout(() => {
     const page = document.getElementById('report-page');
     
@@ -813,7 +824,7 @@ function downloadReport() {
       page.style.background = '';
       document.body.style.overflow = '';
     }, 1500);
-  }, 400);
+  }, 500);
 }
 
 function changeReportFont(fontName, btn) {
