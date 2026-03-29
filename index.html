@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수업 메이킹 일지</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Nanum+Myeongjo:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
 
 @font-face {
     font-family: 'Cafe24Anemone';
@@ -146,9 +146,10 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 
 /* ── A4 리포트 ── */
 #report-page {
+  --rpt-font: 'Noto Sans KR', sans-serif;
   width: 794px; min-height: 1123px;
   background: #ffffff;
-  margin: 0 auto; font-family: 'Gowun Dodum', sans-serif;
+  margin: 0 auto; font-family: var(--rpt-font);
   position: relative; overflow: hidden;
   box-shadow: 0 20px 50px rgba(0,0,0,0.1);
   border: 1px solid #eaeaea;
@@ -166,9 +167,8 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
   padding: 6px 14px; border-radius: 4px; margin-bottom: 14px; text-transform: uppercase;
 }
 .rpt-title {
-  font-family: 'Cafe24Anemone', sans-serif; font-size: 38px; font-weight: 400;
-  color: #111111; line-height: 1.1; margin-bottom: 10px;
-  letter-spacing: -0.5px;
+  font-family: var(--rpt-font); font-size: 38px; font-weight: 800;
+  color: #111111; line-height: 1.1; margin-bottom: 4px;
 }
 .rpt-sub { font-size: 13px; color: #888888; font-weight: 400; }
 
@@ -177,7 +177,7 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 .rpt-meta-item { flex: 1; padding: 16px 20px; border-right: 1px solid #eaeaea; }
 .rpt-meta-item:last-child { border-right: none; }
 .rpt-meta-key { font-size: 9px; font-weight: 700; color: #999999; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 1px; }
-.rpt-meta-val { font-size: 15px; font-weight: 800; color: #111111; }
+.rpt-meta-val { font-size: 15px; font-weight: 800; color: #111111; font-family: var(--rpt-font); }
 
 /* 본문 */
 .rpt-body { padding: 32px 44px 44px; display: flex; gap: 32px; align-items: stretch; }
@@ -237,24 +237,35 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 .rpt-comment-student .rpt-comment-who { color: #868e96; }
 .rpt-comment-teacher .rpt-comment-who { color: #868e96; }
 .rpt-comment-sticker { display: none; }
-.rpt-comment-text { font-size: 14px; color: #111111; line-height: 1.8; font-weight: 400; }
+.rpt-comment-text { font-size: 14px; color: #111111; line-height: 1.8; font-weight: 400; font-family: var(--rpt-font); }
 
 /* 푸터 */
 .rpt-footer { border-top: 1px solid #eaeaea; margin: 0 44px; padding: 24px 0; display: flex; align-items: center; justify-content: space-between; }
 .rpt-footer-left { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #111111; }
 .rpt-footer-dot { width: 6px; height: 6px; border-radius: 50%; background: #111111; }
-.rpt-footer-right { font-size: 11px; color: #999999; font-weight: 400; }
+.rpt-footer-right { font-size: 11px; color: #999999; font-weight: 400; font-family: var(--rpt-font); }
 
 /* 빈 상태 */
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 500px; color: var(--mid); font-size: 13px; gap: 10px; }
 .empty-state-icon { font-size: 48px; animation: bounce 1.5s infinite ease-in-out; }
 @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
 
+/* 폰트 탭 */
+.font-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+.font-tab {
+  flex: 1; padding: 10px; background: white; color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 12px;
+  font-size: 12px; font-weight: 800; cursor: pointer;
+  transition: all 0.2s; box-shadow: 2px 2px 0 var(--ink);
+}
+.font-tab:hover { transform: translateY(-2px); }
+.font-tab.active { background: var(--ink) !important; color: white !important; transform: none; box-shadow: none; }
+
 /* 인쇄 */
 @page { size: A4 portrait; margin: 0; }
 @media print {
   html, body { margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .app-header, .input-panel, .preview-label { display: none !important; }
+  .app-header, .input-panel, .preview-label, .font-tabs { display: none !important; }
   .editor-wrap { display: block !important; margin: 0 !important; padding: 0 !important; max-width: none !important; border: none !important; }
   .preview-panel { margin: 0 !important; padding: 0 !important; border: none !important; }
   .preview-scroll { display: block !important; background: white !important; padding: 0 !important; border: none !important; max-height: none !important; overflow: visible !important; }
@@ -360,6 +371,12 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 
   <div class="preview-panel">
     <div class="preview-label">미리보기</div>
+    <div class="font-tabs">
+      <button class="font-tab active" onclick="changeReportFont('\'Noto Sans KR\', sans-serif', this)">고딕</button>
+      <button class="font-tab" onclick="changeReportFont('\'Gaegu\', cursive', this)">손글씨</button>
+      <button class="font-tab" onclick="changeReportFont('\'Jua\', sans-serif', this)">동글동글</button>
+      <button class="font-tab" onclick="changeReportFont('\'Nanum Myeongjo\', serif', this)">명조</button>
+    </div>
     <div class="preview-scroll">
       <div id="report-page">
         <div class="empty-state">
@@ -748,6 +765,17 @@ function downloadReport() {
     page.style.overflow = '';
     page.style.minHeight = '';
   }, 1000);
+}
+
+function changeReportFont(fontName, btn) {
+  const page = document.getElementById('report-page');
+  page.style.setProperty('--rpt-font', fontName);
+  
+  // 탭 활성화 상태 변경
+  document.querySelectorAll('.font-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  
+  syncPreview();
 }
 
 generateReport();
