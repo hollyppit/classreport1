@@ -36,35 +36,35 @@ export async function onRequestPost(context) {
 
     let resultImage = null;
 
-    if (type === 'generate' || (type === 'upscale' && !image)) {
-      // 1. 순수 이미지 생성 (Imagen 3 모델 사용)
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+    if (type === 'generate') {
+      // 1. 이미지 생성 (Gemini 2.0 Flash Image Generation 전용 모델 사용)
+      const model = 'gemini-2.0-flash-exp-image-generation';
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
       
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          instances: [{ prompt: finalPrompt }],
-          parameters: { sampleCount: 1 }
+          contents: [{ parts: [{ text: finalPrompt }] }],
+          generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
         })
       });
 
       const resJson = await response.json();
-
       if (!response.ok) {
-        console.error('Imagen API Error:', resJson);
-        throw new Error(resJson.error?.message || 'Imagen API 호출 실패');
+        console.error('Gemini Image Gen Error:', resJson);
+        throw new Error(resJson.error?.message || '이미지 생성 실패');
       }
 
-      if (resJson.predictions && resJson.predictions[0]?.bytesBase64Encoded) {
-        resultImage = `data:image/png;base64,${resJson.predictions[0].bytesBase64Encoded}`;
+      const imagePart = resJson.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+      if (imagePart) {
+        resultImage = `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
       } else {
-        throw new Error('생성된 이미지 데이터를 찾을 수 없습니다.');
+        throw new Error('생성된 이미지를 찾을 수 없습니다.');
       }
 
     } else if (type === 'upscale' && image) {
-      // 2. 이미지 기반 퀄업 (기존 Gemini 멀티모달 사용하되 에러 처리 강화)
-      // Imagen 3는 현재 Text-to-Image 특화이므로 퀄업은 Gemini 2.0 Flash로 시도
+      // 2. 이미지 기반 퀄업 (기존 Gemini 멀티모달 사용)
       const model = 'gemini-2.0-flash-exp';
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
       
