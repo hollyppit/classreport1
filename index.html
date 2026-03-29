@@ -349,7 +349,7 @@ img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; f
 
 <div class="app-header">
   <div class="header-badge">✏️ CLASS REPORT</div>
-  <h1>수업 메이킹 일지 ✨</h1>
+  <h1>수업 일지 작성 솔루션 ✨</h1>
   <p>사진이랑 이름만 넣으면 리포트 완성! 인쇄해서 바로 드릴 수 있어요 🎨</p>
 </div>
 
@@ -687,7 +687,7 @@ function generateReport() {
   const page = document.getElementById('report-page');
   if (currentFont) page.style.fontFamily = currentFont;
 
-  const projectName = document.getElementById('project-name').value || '수업 메이킹 일지';
+  const projectName = document.getElementById('project-name').value || '수업 일지 작성 솔루션';
   const studentName = document.getElementById('student-name').value || '학생';
   const sessionInfo = document.getElementById('session-info').value || '-';
   const reportDate  = document.getElementById('report-date').value  || '-';
@@ -871,7 +871,7 @@ function getImageDimensions(dataUrl) {
 async function exportWord() {
   const { Document, Paragraph, TextRun, ImageRun, HeadingLevel, AlignmentType, Packer, Table, TableRow, TableCell, WidthType, BorderStyle } = window.docx;
   
-  const projectName = document.getElementById('project-name').value || '수업 메이킹 일지';
+  const projectName = document.getElementById('project-name').value || '수업 일지 작성 솔루션';
   const studentName = document.getElementById('student-name').value || '학생';
   const sessionInfo = document.getElementById('session-info').value || '-';
   const reportDate  = document.getElementById('report-date').value  || '-';

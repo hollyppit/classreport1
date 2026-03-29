@@ -108,7 +108,7 @@ export async function onRequestPost(context) {
     if (data.mode === 'refine_comments') {
       const { studentComment, teacherComment, studentName, projectName } = data;
       const prompt = `
-        아래는 미술 수업 메이킹 일지의 짧은 메모야. 
+        아래는 수업 일지 작성 솔루션의 짧은 메모야. 
         각각을 자연스럽고 따뜻한 문장으로 2~3줄 분량으로 다듬어줘.
         원래 의미와 뉘앙스는 유지하고, 과하게 과장하지 말고 담백하게 써줘.
         학생 이름은 ${studentName || '학생'}, 프로젝트는 ${projectName || '미술 수업'}이야.
