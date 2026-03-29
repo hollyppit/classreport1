@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수업 메이킹 일지</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+:root {
+  --bg: #fffbf0;
+  --panel: #ffffff;
+  --yellow: #ffe34e;
+  --mint: #4dddbc;
+  --coral: #ff6b6b;
+  --lavender: #c9b8ff;
+  --blue: #5b9fff;
+  --ink: #1e1e2e;
+  --mid: #6b6b8a;
+  --light: #f0ecff;
+  --border: #e8e4f0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(255,227,78,0.18) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(77,221,188,0.15) 0%, transparent 40%),
+    radial-gradient(circle at 60% 10%, rgba(201,184,255,0.2) 0%, transparent 35%);
+  min-height: 100vh;
+  padding: 36px 20px 60px;
+}
+
+/* 헤더 */
+.app-header { text-align: center; margin-bottom: 32px; animation: fadeDown 0.6s ease both; }
+@keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+
+.header-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--yellow); color: var(--ink);
+  font-weight: 900; font-size: 11px; letter-spacing: 2px;
+  padding: 5px 14px; border-radius: 999px; margin-bottom: 10px;
+  border: 2px solid var(--ink);
+}
+.app-header h1 {
+  font-family: 'Gaegu', cursive; font-size: 34px;
+  font-weight: 700; color: var(--ink);
+}
+.app-header p { font-size: 13px; color: var(--mid); margin-top: 4px; font-weight: 300; }
+
+/* 레이아웃 */
+.editor-wrap { display: flex; gap: 22px; max-width: 1120px; margin: 0 auto; align-items: flex-start; }
+
+/* 입력 패널 */
+.input-panel { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; animation: fadeUp 0.5s 0.1s ease both; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+.card {
+  background: var(--panel); border-radius: 20px; padding: 20px;
+  border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+}
+.card-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 900; letter-spacing: 1px;
+  color: var(--ink); margin-bottom: 16px; text-transform: uppercase;
+}
+.card-title-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+label { display: block; font-size: 11px; font-weight: 700; color: var(--mid); margin-bottom: 5px; letter-spacing: 0.5px; }
+
+input[type="text"], textarea {
+  width: 100%; background: var(--light); border: 2px solid var(--border);
+  border-radius: 12px; color: var(--ink);
+  font-family: 'Noto Sans KR', sans-serif; font-size: 13px;
+  padding: 9px 12px; margin-bottom: 10px; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input[type="text"]:focus, textarea:focus {
+  border-color: var(--lavender); box-shadow: 0 0 0 3px rgba(201,184,255,0.3);
+}
+textarea { resize: vertical; min-height: 60px; line-height: 1.6; }
+
+/* 사진 업로드 */
+.photo-card {
+  background: var(--panel); border-radius: 16px; border: 2px dashed var(--border);
+  padding: 12px 14px; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  position: relative; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 12px;
+}
+.photo-card:last-of-type { margin-bottom: 0; }
+.photo-card:hover { border-color: var(--mint); background: #f4fffb; transform: translateY(-2px); }
+.photo-card input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  width: 100%; height: 100%; margin: 0; padding: 0; border: none;
+}
+.photo-icon-wrap {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0; pointer-events: none; overflow: hidden;
+}
+img.thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; flex-shrink: 0; border: 2px solid var(--border); }
+.photo-info { pointer-events: none; }
+.photo-info strong { display: block; font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.photo-info span { font-size: 11px; color: var(--mid); }
+
+/* 버튼 */
+.btn-primary {
+  width: 100%; background: var(--ink); color: #fff;
+  border: 2px solid var(--ink); border-radius: 14px; padding: 13px;
+  font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+  box-shadow: 3px 3px 0 rgba(30,30,46,0.25);
+}
+.btn-primary:hover { background: #2d2d44; }
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-secondary {
+  width: 100%; background: var(--yellow); color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 14px; padding: 11px;
+  font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; margin-top: 8px;
+  transition: background 0.15s, transform 0.1s;
+  box-shadow: 3px 3px 0 rgba(30,30,46,0.2);
+}
+.btn-secondary:hover { background: #ffd800; }
+.btn-secondary:active { transform: scale(0.97); }
+
+/* 미리보기 */
+.preview-panel { flex: 1; min-width: 0; animation: fadeUp 0.5s 0.2s ease both; }
+.preview-label { font-size: 11px; font-weight: 900; letter-spacing: 2px; color: var(--mid); text-transform: uppercase; margin-bottom: 10px; padding-left: 4px; }
+.preview-scroll {
+  background: #e8e4f0; border-radius: 20px; padding: 20px;
+  overflow: auto; max-height: 88vh; border: 2px solid var(--border);
+}
+
+/* ── A4 리포트 ── */
+#report-page {
+  width: 794px; min-height: 1123px; background: #fffbf4;
+  margin: 0 auto; font-family: 'Noto Sans KR', sans-serif;
+  position: relative; overflow: hidden;
+  box-shadow: 8px 8px 0 rgba(30,30,46,0.15), 0 0 0 2px var(--ink);
+  border-radius: 4px;
+}
+
+/* 리포트 헤더 */
+.rpt-header { background: var(--ink); position: relative; overflow: hidden; }
+.rpt-header::before {
+  content: ''; position: absolute; right: -30px; top: -40px;
+  width: 180px; height: 180px; border-radius: 50%;
+  background: var(--yellow); opacity: 0.18; z-index: 1;
+}
+.rpt-header::after {
+  content: ''; position: absolute; right: 100px; bottom: -20px;
+  width: 100px; height: 100px; border-radius: 50%;
+  background: var(--mint); opacity: 0.2; z-index: 1;
+}
+.rpt-header-inner { position: relative; z-index: 2; padding: 30px 44px 26px; }
+
+.rpt-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: transparent; color: rgba(255,255,255,0.4);
+  font-size: 11px; font-weight: 400; letter-spacing: 3px;
+  padding: 0; border-radius: 0; margin-bottom: 8px; text-transform: uppercase;
+}
+.rpt-title {
+  font-family: 'Gaegu', cursive; font-size: 36px; font-weight: 700;
+  color: #ffffff; line-height: 1.2; margin-bottom: 4px;
+  -webkit-text-stroke: 0.5px rgba(255,255,255,0.8);
+}
+.rpt-sub { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 300; }
+
+/* 메타 바 */
+.rpt-meta { display: flex; background: var(--yellow); }
+.rpt-meta-item { flex: 1; padding: 12px 20px; border-right: 2px solid rgba(30,30,46,0.12); }
+.rpt-meta-item:last-child { border-right: none; }
+.rpt-meta-key { font-size: 8.5px; font-weight: 900; letter-spacing: 2px; color: rgba(30,30,46,0.5); text-transform: uppercase; margin-bottom: 2px; }
+.rpt-meta-val { font-size: 13px; font-weight: 700; color: var(--ink); }
+
+/* 본문 */
+.rpt-body { padding: 24px 44px 32px; }
+
+.rpt-sec { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; margin-top: 22px; }
+.rpt-sec:first-child { margin-top: 0; }
+.rpt-sec-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 9px; font-weight: 900; letter-spacing: 2px;
+  text-transform: uppercase; padding: 4px 12px;
+  border-radius: 999px; border: 1.5px solid currentColor; white-space: nowrap;
+}
+.rpt-sec-line { flex: 1; height: 1.5px; border-radius: 999px; }
+
+/* 사진 그리드 */
+.rpt-photos { display: grid; gap: 10px; }
+.rpt-photos.cols-1 { grid-template-columns: 1fr; }
+.rpt-photos.cols-2 { grid-template-columns: 1fr 1fr; }
+.rpt-photos.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.rpt-photo-cell {
+  border-radius: 14px; overflow: hidden; aspect-ratio: 4/3;
+  position: relative; border: 2px solid var(--ink);
+}
+.rpt-photo-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rpt-photo-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(30,30,46,0.7));
+  padding: 18px 10px 8px; font-size: 10px; font-weight: 700; color: #fff;
+}
+.rpt-photo-empty {
+  width: 100%; height: 100%; background: var(--light);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; color: var(--border); font-size: 11px;
+}
+.rpt-photo-empty-icon { font-size: 26px; }
+
+/* 비교 */
+.rpt-compare { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }
+.rpt-compare-arrow { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.rpt-arrow-circle {
+  width: 34px; height: 34px; background: var(--coral); color: white;
+  border-radius: 50%; border: 2px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 900; box-shadow: 2px 2px 0 var(--ink);
+}
+.rpt-arrow-label { font-size: 8px; font-weight: 900; letter-spacing: 1px; color: var(--coral); text-transform: uppercase; }
+
+/* 코멘트 */
+.rpt-comment { border-radius: 14px; padding: 14px 18px; margin-bottom: 10px; position: relative; }
+.rpt-comment-student { background: #fff9e6; border: 2px solid var(--yellow); }
+.rpt-comment-teacher { background: #edfff9; border: 2px solid var(--mint); }
+.rpt-comment-who { font-size: 9px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
+.rpt-comment-student .rpt-comment-who { color: #c8940a; }
+.rpt-comment-teacher .rpt-comment-who { color: #1a9e7e; }
+.rpt-comment-sticker { position: absolute; top: -10px; right: 14px; font-size: 20px; }
+.rpt-comment-text { font-size: 12.5px; color: var(--ink); line-height: 1.75; }
+
+/* 푸터 */
+.rpt-footer { border-top: 2px dashed var(--border); margin: 0 44px; padding: 14px 0; display: flex; align-items: center; justify-content: space-between; }
+.rpt-footer-left { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; color: var(--mid); }
+.rpt-footer-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); }
+.rpt-footer-right { font-size: 10px; color: var(--border); }
+
+/* 빈 상태 */
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 500px; color: var(--mid); font-size: 13px; gap: 10px; }
+.empty-state-icon { font-size: 48px; animation: bounce 1.5s infinite ease-in-out; }
+@keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+
+/* 인쇄 */
+@media print {
+  body { background: white; padding: 0; }
+  .input-panel, .preview-label, .app-header { display: none; }
+  .editor-wrap { display: block; }
+  .preview-scroll { background: white; padding: 0; border-radius: 0; max-height: none; border: none; }
+  #report-page { box-shadow: none; width: 100%; border: none; border-radius: 0; }
+}
+@media (max-width: 900px) {
+  .editor-wrap { flex-direction: column; }
+  .input-panel { width: 100%; }
+  #report-page { width: 100%; min-height: auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="header-badge">✏️ ART CLASS</div>
+  <h1>수업 메이킹 일지 ✨</h1>
+  <p>사진이랑 이름만 넣으면 리포트 완성! 인쇄해서 바로 드릴 수 있어요 🎨</p>
+</div>
+
+<div class="editor-wrap">
+  <div class="input-panel">
+
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-dot" style="background:var(--coral)"></div>기본 정보
+      </div>
+      <label>프로젝트 / 수업 이름</label>
+      <input type="text" id="project-name" placeholder="예: 나만의 웹툰 만들기" oninput="syncPreview()">
+      <label>학생 이름</label>
+      <input type="text" id="student-name" placeholder="예: 김지유" oninput="syncPreview()">
+      <label>회차</label>
+      <input type="text" id="session-info" placeholder="예: 3회차 / 8회차" oninput="syncPreview()">
+      <label>날짜</label>
+      <input type="text" id="report-date" placeholder="예: 2025년 8월 5일" oninput="syncPreview()">
+      <label>담당 선생님 (선택)</label>
+      <input type="text" id="teacher-name" placeholder="예: 백진우 선생님" oninput="syncPreview()">
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-dot" style="background:var(--mint)"></div>사진 업로드
+      </div>
+      <div class="photo-card">
+        <input type="file" accept="image/*" onchange="handlePhoto(this,'storyboard')">
+        <div id="icon-storyboard" class="photo-icon-wrap" style="background:#fff9e6;">✏️</div>
+        <div class="photo-info"><strong>원본</strong><span>손 스케치 또는 기획 사진</span></div>
+      </div>
+      <div class="photo-card">
+        <input type="file" accept="image/*" onchange="handlePhoto(this,'process')">
+        <div id="icon-process" class="photo-icon-wrap" style="background:#edfff9;">🎨</div>
+        <div class="photo-info"><strong>수업 중간 모습</strong><span>작업 과정 또는 수업 장면</span></div>
+      </div>
+      <div class="photo-card" style="margin-bottom:0;">
+        <input type="file" accept="image/*" onchange="handlePhoto(this,'final')">
+        <div id="icon-final" class="photo-icon-wrap" style="background:#f0ecff;">⭐</div>
+        <div class="photo-info"><strong>최종 완성본</strong><span>결과물 사진</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-dot" style="background:var(--lavender)"></div>코멘트 (선택)
+      </div>
+      <label>학생 소감</label>
+      <textarea id="student-comment" placeholder="예: 내 캐릭터가 살아있는 것 같아서 너무 신기했어요!" oninput="syncPreview()"></textarea>
+      <label>선생님 코멘트</label>
+      <textarea id="teacher-comment" placeholder="예: 색감 선택이 굉장히 과감하고 독창적이었습니다." oninput="syncPreview()"></textarea>
+    </div>
+
+    <button class="btn-primary" onclick="generateReport()">리포트 생성하기 🎉</button>
+    <button class="btn-secondary" onclick="downloadReport()">⬇ PDF로 저장하기</button>
+  </div>
+
+  <div class="preview-panel">
+    <div class="preview-label">미리보기</div>
+    <div class="preview-scroll">
+      <div id="report-page">
+        <div class="empty-state">
+          <div class="empty-state-icon">🖼️</div>
+          <span>왼쪽에서 정보를 입력하면</span>
+          <span>리포트가 여기에 나타나요!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const photos = { storyboard: null, process: null, final: null };
+
+function handlePhoto(input, key) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    photos[key] = e.target.result;
+    const el = document.getElementById('icon-' + key);
+    el.outerHTML = `<img id="icon-${key}" class="thumb" src="${e.target.result}" alt="">`;
+    syncPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function syncPreview() { generateReport(); }
+
+function generateReport() {
+  const projectName = document.getElementById('project-name').value || '수업 메이킹 일지';
+  const studentName = document.getElementById('student-name').value || '학생';
+  const sessionInfo = document.getElementById('session-info').value || '-';
+  const reportDate  = document.getElementById('report-date').value  || '-';
+  const teacherName = document.getElementById('teacher-name').value;
+  const studentCmt  = document.getElementById('student-comment').value;
+  const teacherCmt  = document.getElementById('teacher-comment').value;
+
+  const hasStory = !!photos.storyboard;
+  const hasProc  = !!photos.process;
+  const hasFinal = !!photos.final;
+
+  let photosHTML = '';
+
+  if (hasStory && hasFinal) {
+    photosHTML += `
+      <div class="rpt-sec" style="margin-top:0;">
+        <div class="rpt-sec-pill" style="color:#ff6b6b;border-color:#ff6b6b;">🔄 Before → After</div>
+        <div class="rpt-sec-line" style="background:#ffd6d6;"></div>
+      </div>
+      <div class="rpt-compare">
+        <div class="rpt-photo-cell"><img src="${photos.storyboard}" alt="원본"><div class="rpt-photo-label">✏️ 원본</div></div>
+        <div class="rpt-compare-arrow"><div class="rpt-arrow-circle">→</div><div class="rpt-arrow-label">완성</div></div>
+        <div class="rpt-photo-cell"><img src="${photos.final}" alt="완성본"><div class="rpt-photo-label">⭐ 최종 완성본</div></div>
+      </div>`;
+  } else if (hasStory || hasFinal) {
+    const singles = [];
+    if (hasStory) singles.push({ src: photos.storyboard, label: '✏️ 원본' });
+    if (hasFinal) singles.push({ src: photos.final, label: '⭐ 최종 완성본' });
+    photosHTML += `
+      <div class="rpt-sec" style="margin-top:0;">
+        <div class="rpt-sec-pill" style="color:#ff6b6b;border-color:#ff6b6b;">🖼️ 작업 기록</div>
+        <div class="rpt-sec-line" style="background:#ffd6d6;"></div>
+      </div>
+      <div class="rpt-photos cols-${singles.length}">
+        ${singles.map(p=>`<div class="rpt-photo-cell"><img src="${p.src}" alt=""><div class="rpt-photo-label">${p.label}</div></div>`).join('')}
+      </div>`;
+  } else {
+    photosHTML += `
+      <div class="rpt-sec" style="margin-top:0;">
+        <div class="rpt-sec-pill" style="color:#ff6b6b;border-color:#ff6b6b;">🖼️ 작업 기록</div>
+        <div class="rpt-sec-line" style="background:#ffd6d6;"></div>
+      </div>
+      <div class="rpt-photos cols-3">
+        ${[{icon:'✏️',l:'원본'},{icon:'🎨',l:'과정'},{icon:'⭐',l:'완성본'}].map(p=>`
+          <div class="rpt-photo-cell"><div class="rpt-photo-empty"><div class="rpt-photo-empty-icon">${p.icon}</div>${p.l}</div></div>
+        `).join('')}
+      </div>`;
+  }
+
+  if (hasProc) {
+    photosHTML += `
+      <div class="rpt-sec">
+        <div class="rpt-sec-pill" style="color:#4dddbc;border-color:#4dddbc;">🎨 작업 과정</div>
+        <div class="rpt-sec-line" style="background:#c0f5eb;"></div>
+      </div>
+      <div class="rpt-photos cols-1">
+        <div class="rpt-photo-cell" style="aspect-ratio:16/6;"><img src="${photos.process}" alt=""><div class="rpt-photo-label">🎨 수업 중간 모습</div></div>
+      </div>`;
+  }
+
+  let commentsHTML = '';
+  if (studentCmt || teacherCmt) {
+    commentsHTML += `
+      <div class="rpt-sec">
+        <div class="rpt-sec-pill" style="color:#8b6fff;border-color:#c9b8ff;">💬 코멘트</div>
+        <div class="rpt-sec-line" style="background:#e8e0ff;"></div>
+      </div>`;
+    if (studentCmt) commentsHTML += `
+      <div class="rpt-comment rpt-comment-student">
+        <div class="rpt-comment-sticker">🌟</div>
+        <div class="rpt-comment-who">학생 소감 · ${studentName}</div>
+        <div class="rpt-comment-text">"${studentCmt}"</div>
+      </div>`;
+    if (teacherCmt) commentsHTML += `
+      <div class="rpt-comment rpt-comment-teacher">
+        <div class="rpt-comment-sticker">✍️</div>
+        <div class="rpt-comment-who">선생님 코멘트${teacherName?' · '+teacherName:''}</div>
+        <div class="rpt-comment-text">${teacherCmt}</div>
+      </div>`;
+  }
+
+  const metaItems = [
+    {key:'학생', val:studentName},
+    {key:'회차', val:sessionInfo},
+    {key:'날짜', val:reportDate},
+  ];
+  if (teacherName) metaItems.push({key:'담당', val:teacherName});
+
+  document.getElementById('report-page').innerHTML = `
+    <div class="rpt-header">
+      <div class="rpt-header-inner">
+        <div class="rpt-badge">🎨 ART CLASS · MAKING REPORT</div>
+        <div class="rpt-title">${projectName}</div>
+      </div>
+    </div>
+    <div class="rpt-meta">
+      ${metaItems.map(m=>`<div class="rpt-meta-item"><div class="rpt-meta-key">${m.key}</div><div class="rpt-meta-val">${m.val}</div></div>`).join('')}
+    </div>
+    <div class="rpt-body">
+      ${photosHTML}
+      ${commentsHTML}
+    </div>
+    <div class="rpt-footer">
+      <div class="rpt-footer-left"><div class="rpt-footer-dot"></div>Making Report</div>
+      <div class="rpt-footer-right">${projectName} · ${studentName}</div>
+    </div>`;
+}
+
+function downloadReport() {
+  generateReport();
+  setTimeout(() => window.print(), 300);
+}
+
+generateReport();
+</script>
+</body>
+</html>
