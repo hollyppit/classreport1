@@ -104,6 +104,28 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ prompt: resultText }), { headers: corsHeaders() });
     }
 
+    // 신규 모드: 코멘트 다듬기 (Refine)
+    if (data.mode === 'refine_comments') {
+      const { studentComment, teacherComment, studentName, projectName } = data;
+      const prompt = `
+        아래는 미술 수업 메이킹 일지의 짧은 메모야. 
+        각각을 자연스럽고 따뜻한 문장으로 2~3줄 분량으로 다듬어줘.
+        원래 의미와 뉘앙스는 유지하고, 과하게 과장하지 말고 담백하게 써줘.
+        학생 이름은 ${studentName || '학생'}, 프로젝트는 ${projectName || '미술 수업'}이야.
+
+        수업 활동 내용 원본: ${studentComment || '없음'}
+        선생님 코멘트 원본: ${teacherComment || '없음'}
+
+        반드시 JSON으로만 반환해줘:
+        { "studentComment": "...", "teacherComment": "..." }
+      `;
+      const systemPrompt = "You are a warm and professional art educator. Refine the given notes into gentle, concise sentences. Output only JSON.";
+      const result = await callAI(prompt, env, systemPrompt, true);
+      
+      if (!result) throw new Error('Comment refinement failed');
+      return new Response(JSON.stringify(result), { headers: corsHeaders() });
+    }
+
     // 모드 2: 기존 리포트 생성 (기존 로직)
     const { projectName, studentName, sessionInfo, reportDate, teacherName, student_comment, teacher_comment, storyboardImg, processImg, finalImg } = data;
     const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });

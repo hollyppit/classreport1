@@ -577,17 +577,16 @@ async function generateAIReport(btn) {
 
 async function generateAIComment(btn) {
   const originalText = btn.innerHTML;
-  btn.innerHTML = "⏳ 생성 중...";
+  btn.innerHTML = "✨ 다듬는 중...";
   btn.disabled = true;
 
   try {
     const req = {
-      projectName: document.getElementById('project-name').value,
+      mode: 'refine_comments',
       studentName: document.getElementById('student-name').value,
-      sessionInfo: document.getElementById('session-info').value,
-      storyboardImg: photos.storyboard,
-      processImg: photos.process,
-      finalImg: photos.final
+      projectName: document.getElementById('project-name').value,
+      studentComment: document.getElementById('student-comment').value,
+      teacherComment: document.getElementById('teacher-comment').value
     };
 
     const res = await fetch('/api/generate', {
@@ -599,13 +598,13 @@ async function generateAIComment(btn) {
     if (!res.ok) throw new Error('AI 분석에 실패했습니다.');
     
     const data = await res.json();
-    if (data.student_comment) document.getElementById('student-comment').value = data.student_comment;
-    if (data.teacher_comment) document.getElementById('teacher-comment').value = data.teacher_comment;
+    if (data.studentComment) document.getElementById('student-comment').value = data.studentComment;
+    if (data.teacherComment) document.getElementById('teacher-comment').value = data.teacherComment;
     
     syncPreview();
   } catch (e) {
     console.error(e);
-    alert('AI 코멘트 생성에 실패했습니다.');
+    alert('코멘트 정제 중 오류가 발생했습니다.');
   } finally {
     btn.innerHTML = originalText;
     btn.disabled = false;
