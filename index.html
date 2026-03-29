@@ -709,7 +709,7 @@ function generateReport() {
     if (hasStoryboard || hasFinal) {
       photosHTML += `
         <div class="rpt-sec" style="margin-top:0;">
-          <div class="rpt-sec-pill" style="color:#ff6b6b;border-color:#ff6b6b;">작업 기록</div>
+          <div class="rpt-sec-pill" style="color:#ff6b6b;border-color:#ff6b6b;">실습 기록</div>
           <div class="rpt-sec-line" style="background:#ffd6d6;"></div>
         </div>
       `;
@@ -926,8 +926,8 @@ async function exportWord() {
 
   // 1. 사진들 수집
   const photoKeys = [
-    { key: 'storyboard', label: '작업 기록 (원본/기획)' },
-    { key: 'final', label: '작업 기록 (최종 완성본)' },
+    { key: 'storyboard', label: '실습 기록 (원본/기획)' },
+    { key: 'final', label: '실습 기록 (최종 완성본)' },
     { key: 'process', label: '수업 과정' }
   ];
   
